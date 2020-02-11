@@ -1,0 +1,19 @@
+package Service;
+
+import Result.LoginResult;
+import Request.LoginRequest;
+
+/**
+ * A class used to log a user into the server and serve the API route <code>user/login</code>.
+ */
+public class LoginService {
+    /**
+     * Logs in the user and returns an auth token.
+     *
+     * @param request An instance of LoginRequest with the data needed to perform the function.
+     * @return An AuthToken needed to maintain the User's login status
+     */
+    public static LoginResult login(LoginRequest request) {
+        return null;
+    }
+}
