@@ -1,6 +1,5 @@
 package Service;
 
-import Request.ClearRequest;
 import Result.ClearResult;
 
 /**
