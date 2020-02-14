@@ -16,11 +16,39 @@ public class User {
     /**
      * Creates a user
      *
-     * @param userName String. The userName for the user
-     * @param passWord String. A unique passWord for the user.
+     * @param userName Unique user name (non-empty string)
+     * @param passWord User’s password (non-empty string)
+     * @param email User’s email address (non-empty string)
+     * @param firstName User’s first name (non-empty string)
+     * @param lastName User’s last name (non-empty string)
+     * @param gender User’s gender (string: "f" or "m")
+     * @param personID Unique Person ID assigned to this user’s generated
+     *                 Person object - see Family History Information section
+     *                 for details (non-empty string)
+     */
+    public User(String userName, String passWord, String email, String firstName,
+                String lastName, String gender, String personID) {
+        setUserName(userName);
+        setPassWord(passWord);
+    }
+
+    /**
+     * Creates a user
+     *
+     * @param userName  Unique user name (non-empty string)
+     * @param passWord  User’s password (non-empty string)
      */
     public User(String userName, String passWord) {
+        setUserName(userName);
+        setPassWord(passWord);
+    }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getPassWord() {
+        return passWord;
     }
 
     public String getEmail() {
@@ -39,6 +67,19 @@ public class User {
         return gender;
     }
 
+    public String getPersonID() {
+        return personID;
+    }
+
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setPassWord(String passWord) {
+        this.passWord = passWord;
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -53,5 +94,9 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public void setPersonID(String personID) {
+        this.personID = personID;
     }
 }

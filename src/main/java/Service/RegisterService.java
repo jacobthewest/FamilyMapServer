@@ -11,7 +11,7 @@ public class RegisterService {
          * user, logs the user in, and returns an auth token.
          *
          * @param request A RegisterService object containing data needed to serve the API call
-         * @return the result of registering the user
+         * @return The result of registering the user
          */
         public static RegisterResult register(RegisterRequest request) {
                 return null;

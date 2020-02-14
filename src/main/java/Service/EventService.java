@@ -1,7 +1,6 @@
 package Service;
 
 import Model.Event;
-import Request.EventRequest;
 import Result.EventResult;
 
 /**
@@ -12,21 +11,21 @@ public class EventService {
     /**
      * Implements the <code>/event/[eventID]</code>
      *
-     * @param request An instance of EventRequest with the needed data for the function.
-     * @return the single Event object with the specified ID.
+     * @param eventID The identifier of the event we will retrieve from
+     *                the database
+     * @return The single Event object with the eventId to query the database
      */
-    public static Event getEvent(EventRequest request) {
+    public static Event getEvent(String eventID) {
         return null;
     }
 
     /**
      * Implements the <code>/event</code> API route.
      *
-     * @param request An instance of EventRequest with the needed data for the function.
      * @return Returns ALL events for ALL family members of the current user. The current
      * user is determined from the provided auth token
      */
-    public static EventResult getAllEvents(EventRequest request) {
+    public static EventResult getAllEvents() {
         return null;
     }
 }

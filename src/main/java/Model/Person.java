@@ -16,37 +16,39 @@ public class Person {
     /**
      * Creates a Person
      *
-     * @param personID unique String Id for the person
-     * @param associatedUsername unique String userName for the person
-     * @param firstName String firstName of the person
-     * @param lastName String lastName of the person
-     * @param gender String gender of the person. Either 'f' or 'm'
-     * @param fatherID String id of the father of the person. May be null.
-     * @param motherID String id of the mother of the person. May be null.
-     * @param spouseID String id of the spouse of the person. May be null.
+     * @param personID Unique identifier for this person (non-empty string)
+     * @param associatedUsername User (Username) to which this person belongs
+     * @param firstName Person’s first name (non-empty string)
+     * @param lastName Person’s last name (non-empty string)
+     * @param gender Person’s gender (string: "f" or "m")
+     * @param fatherID Person ID of person’s father (possibly null)
+     * @param motherID Person ID of person’s mother (possibly null)
+     * @param spouseID Person ID of person’s spouse (possibly null)
      */
-    public Person(String personID, String associatedUsername, String firstName, String lastName, String gender,
-                  String fatherID, String motherID, String spouseID) {
-
+    public Person(String personID, String associatedUsername, String firstName, String lastName,
+                  String gender, String fatherID, String motherID, String spouseID) {
+        setPersonID(personID);
+        setAssociatedUsername(associatedUsername);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setGender(gender);
+        setFirstName(fatherID);
+        setMotherId(motherID);
+        setSpouseId(spouseID);
     }
 
     /**
      * Creates a person with a personId and an associatedUsername
      *
-     * @param personID unique String Id for the person
-     * @param associatedUsername unique String userName for the person
+     * @param personID Unique identifier for this person (non-empty string)
+     * @param associatedUsername User (Username) to which this person belongs
      */
     public Person(String personID, String associatedUsername) {
-
+        setPersonID(personID);
+        setAssociatedUsername(associatedUsername);
     }
 
-    /**
-     * Auto generates a personId and creates a person using the associatedUsername
-     * @param associatedUsername unique String userName for the person
-     */
-    public Person(String associatedUsername) {
-
-    }
+    public String getPersonID() {return personID;}
 
     public String getAssociatedUsername() {
         return associatedUsername;
@@ -74,6 +76,10 @@ public class Person {
 
     public String getSpouseId() {
         return spouseID;
+    }
+
+    public void setPersonID(String personID) {
+        this.personID = personID;
     }
 
     public void setAssociatedUsername(String associatedUsername) {
