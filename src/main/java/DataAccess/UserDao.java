@@ -4,6 +4,7 @@ import Model.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -34,6 +35,9 @@ public class UserDao {
     private final String UPDATE_SQL = "UPDATE User" +
             "password = ?, email = ?, firstName = ?, lastName = ?, " +
             "gender = ?, personID = ?" +
+            "WHERE userName = ?";
+    private final String SELECT_SQL = "SELECT userName, password, email, " +
+            "firstName, lastName, gender, personID FROM User " +
             "WHERE userName = ?";
 
     /**
@@ -104,21 +108,34 @@ public class UserDao {
 
     /**
      * Get's a User from the User table
-     * @param userID String identifier of a User object
-     * @return A User object
-     * @throws DatabaseException Error with database operation
-     */
-    public User getUserByUserID(String userID) throws DatabaseException {
-        return null;
-    }
-
-    /**
-     * Get's a User from the User table
      * @param userName String identifier of a User object
      * @return A User object
      * @throws DatabaseException Error with database operation
      */
     public User getUserByUserName(String userName) throws DatabaseException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement(SELECT_SQL);
+            stmt.setString(1, userName);
+            rs = stmt.executeQuery();
+            stmt.close();
+
+            User user = null;
+            while (rs.next()) {
+                String password = rs.getString(1);
+                String email = rs.getString(2);
+                String firstName = rs.getString(3);
+                String lastName = rs.getString(4);
+                String gender = rs.getString(5);
+                String personID = rs.getString(6);
+                user = new User(userName, password, email, firstName, lastName, gender, personID);
+                return user;
+            }
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when inserting User object: " + e);
+        }
         return null;
     }
 
