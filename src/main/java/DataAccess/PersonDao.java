@@ -1,10 +1,12 @@
 package DataAccess;
 
 import Model.Person;
+import Model.User;
 
 import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -29,6 +31,9 @@ public class PersonDao {
     private final String UPDATE_SQL = "UPDATE Person" +
             "SET associatedUsername = ?, firstName = ?, lastName = ?, " +
             "gender = ?, fatherID = ?, motherID = ?, spouseID = ?" +
+            "WHERE personID = ?";
+    private final String SELECT_SQL = "SELECT associatedUsername, firstName, " +
+            "lastName, gender, fatherID, motherID, spouseID FROM Person " +
             "WHERE personID = ?";
 
     /**
@@ -170,7 +175,31 @@ public class PersonDao {
      * @throws DatabaseException Error with database operation
      */
     public Person getPersonByPersonID(String personID) throws DatabaseException {
-        return null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Person person = null;
+        try {
+            stmt = connection.prepareStatement(SELECT_SQL);
+            stmt.setString(1, personID);
+            rs = stmt.executeQuery();
+            stmt.close();
+
+            while (rs.next()) {
+                String associatedUsername = rs.getString(1);
+                String firstName = rs.getString(2);
+                String lastName = rs.getString(3);
+                String gender = rs.getString(4);
+                String fatherID = rs.getString(5);
+                String motherID = rs.getString(6);
+                String spouseID = rs.getString(7);
+                person = new Person(personID, associatedUsername, firstName, lastName, gender,
+                        fatherID, motherID, spouseID);
+            }
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when selecting Person object: " + e);
+        }
+        return person;
     }
 
     public void setConnection(Connection connection) {

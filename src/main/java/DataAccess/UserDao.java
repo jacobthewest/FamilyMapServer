@@ -115,13 +115,13 @@ public class UserDao {
     public User getUserByUserName(String userName) throws DatabaseException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        User user = null;
         try {
             stmt = connection.prepareStatement(SELECT_SQL);
             stmt.setString(1, userName);
             rs = stmt.executeQuery();
             stmt.close();
 
-            User user = null;
             while (rs.next()) {
                 String password = rs.getString(1);
                 String email = rs.getString(2);
@@ -130,13 +130,12 @@ public class UserDao {
                 String gender = rs.getString(5);
                 String personID = rs.getString(6);
                 user = new User(userName, password, email, firstName, lastName, gender, personID);
-                return user;
             }
         }
         catch (Exception e) {
-            throw new DatabaseException("SQLException when inserting User object: " + e);
+            throw new DatabaseException("SQLException when selecting User object: " + e);
         }
-        return null;
+        return user;
     }
 
     /**

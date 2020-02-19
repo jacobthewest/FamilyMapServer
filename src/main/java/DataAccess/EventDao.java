@@ -6,6 +6,7 @@ import Model.Person;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -37,6 +38,9 @@ public class EventDao {
     private final String UPDATE_SQL = "UPDATE Event" +
             "SET associatedUsername = ?, personID = ?, latitude = ?, " +
             "longitude = ?, country = ?, city = ?, eventType = ?, year = ?" +
+            "WHERE eventID = ?";
+    private final String SELECT_SQL = "SELECT associatedUsername, personID, " +
+            "latitude, longitude, country, city, eventType, year FROM Event " +
             "WHERE eventID = ?";
 
     /**
@@ -181,7 +185,34 @@ public class EventDao {
      * @throws DatabaseException Error with database operation
      */
     public Event getEventByEventID(String eventID) throws DatabaseException {
-        return null;
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Event event = null;
+        try {
+            stmt = connection.prepareStatement(SELECT_SQL);
+            stmt.setString(1, eventID);
+            rs = stmt.executeQuery();
+            stmt.close();
+
+            while (rs.next()) {
+                String associatedUsername = rs.getString(1);
+                String personID = rs.getString(2);
+                double latitude = rs.getDouble(3);
+                double longitude = rs.getDouble(4);
+                String country = rs.getString(5);
+                String city = rs.getString(6);
+                String eventType = rs.getString(7);
+                int year = rs.getInt(8);
+
+                event = new Event(eventID, associatedUsername, personID, latitude, longitude,
+                        country, city, eventType, year);
+            }
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when selecting Event object: " + e);
+        }
+        return event;
     }
 
     public void setConnection(Connection connection) {

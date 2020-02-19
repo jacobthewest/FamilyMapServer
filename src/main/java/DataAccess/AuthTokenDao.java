@@ -23,6 +23,8 @@ public class AuthTokenDao {
     private final String DELETE_SQL = "DELETE FROM AuthToken" +
             "WHERE token = ?;";
     private final String EMPTY_SQL = "DELETE FROM AuthToken";
+    private final String SELECT_BY_TOKEN = "SELECT userName FROM AuthToken WHERE token = ?";
+    private final String SELECT_BY_USER_NAME = "SELECT token FROM AuthToken WHERE userName = ?";
 
     /**
      * Creates an AuthToken database access object to access SQL Database
@@ -142,7 +144,28 @@ public class AuthTokenDao {
      * @throws DatabaseException Error with database operation
      */
     public User getUser(String token) throws DatabaseException {
-        return null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        User user = null;
+        try {
+            stmt = connection.prepareStatement(SELECT_BY_TOKEN);
+            stmt.setString(1, token);
+            rs = stmt.executeQuery();
+            stmt.close();
+
+            String userName = null;
+            while (rs.next()) {
+                userName = rs.getString(1);
+            }
+
+            UserDao userDao = new UserDao();
+            userDao.setConnection(this.connection);
+            user = userDao.getUserByUserName(userName);
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when selecting User object from AuthTokenDao class: " + e);
+        }
+        return user;
     }
 
     /**
@@ -152,7 +175,26 @@ public class AuthTokenDao {
      * @throws DatabaseException Error with database operation
      */
     public AuthToken getAuthTokenByUserName(String userName) throws DatabaseException{
-        return null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        AuthToken authToken = null;
+        try {
+            stmt = connection.prepareStatement(SELECT_BY_USER_NAME);
+            stmt.setString(1, userName);
+            rs = stmt.executeQuery();
+            stmt.close();
+
+            String token = null;
+            while (rs.next()) {
+                token = rs.getString(1);
+            }
+
+            authToken = new AuthToken(token, userName);
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when selecting AuthToken object: " + e);
+        }
+        return authToken;
     }
 
     public Connection getConnection() {
