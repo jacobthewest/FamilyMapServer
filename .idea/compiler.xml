@@ -9,8 +9,8 @@
         <module name="FamilyMapServerStudent" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="FamilyMapServerStudent" target="1.12" />
+    <bytecodeTargetLevel target="8">
+      <module name="FamilyMapServerStudent" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
