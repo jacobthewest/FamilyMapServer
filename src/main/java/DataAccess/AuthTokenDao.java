@@ -1,6 +1,7 @@
 package DataAccess;
 
 import Model.AuthToken;
+import Model.Event;
 import Model.User;
 
 import java.sql.*;
@@ -11,7 +12,7 @@ import java.sql.*;
 public class AuthTokenDao {
 
     private Connection connection;
-    private final String DROP_SQL = "DROP TABLE IF EXISTS AuthToken";
+    private final String DROP_SQL = "DROP TABLE AuthToken";
     private final String CREATE_SQL = "CREATE TABLE IF NOT EXISTS AuthToken " +
             "(" +
             "token TEXT NOT NULL, " +
@@ -22,7 +23,6 @@ public class AuthTokenDao {
             "VALUES (?,?);";
     private final String DELETE_SQL = "DELETE FROM AuthToken" +
             "WHERE token = ?;";
-    private final String EMPTY_SQL = "DELETE FROM AuthToken";
     private final String SELECT_BY_TOKEN = "SELECT userName FROM AuthToken WHERE token = ?";
     private final String SELECT_BY_USER_NAME = "SELECT token FROM AuthToken WHERE userName = ?";
 
@@ -70,12 +70,19 @@ public class AuthTokenDao {
 
     /**
      * Inserts an AuthToken object into the database if it doesn't exist in it
+     * @return If the user was successfully inserted
      * @param authToken An AuthToken object to insert
      * @throws DatabaseException Error with database operation
      */
-    public void insertAuthToken(AuthToken authToken) throws DatabaseException {
+    public boolean insertAuthToken(AuthToken authToken) throws DatabaseException {
         PreparedStatement stmt = null;
         try {
+
+            AuthToken tempToken = getAuthTokenByUserName(authToken.getUserName());
+            if(tempToken != null) {
+                return false;
+            }
+
             stmt = connection.prepareStatement(INSERT);
             stmt.setString(1, authToken.getToken());
             stmt.setString(2, authToken.getUserName());
@@ -84,6 +91,7 @@ public class AuthTokenDao {
                 throw new DatabaseException("Error with inserting AuthToken into database");
             }
             stmt.close();
+            return true;
         }
         catch (Exception e) {
             throw new DatabaseException("SQLException when inserting AuthToken: " + e);
@@ -117,10 +125,8 @@ public class AuthTokenDao {
     public void empty() throws DatabaseException {
         PreparedStatement stmt = null;
         try {
+            String EMPTY_SQL = "DELETE FROM AuthToken";
             stmt = connection.prepareStatement(EMPTY_SQL);
-            if (stmt.executeUpdate() != 1) {
-                throw new DatabaseException("Error with emptying AuthToken table");
-            }
             stmt.close();
         }
         catch (Exception e) {

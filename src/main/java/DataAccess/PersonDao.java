@@ -15,13 +15,20 @@ import java.sql.SQLException;
 public class PersonDao {
 
     private Connection connection;
-    private final String CREATE_SQL = "CREATE TABLE IF NOT EXISTS AuthTokens " +
+    private final String CREATE_SQL = "CREATE TABLE IF NOT EXISTS Person " +
             "(" +
-            "token TEXT NOT NULL, " +
-            "userName TEXT NOT NULL" +
+            "personID TEXT NOT NULL, " +
+            "associatedUsername TEXT NOT NULL, " +
+            "firstName TEXT NOT NULL, " +
+            "lastName TEXT NOT NULL, " +
+            "gender TEXT NOT NULL, " +
+            "fatherID TEXT, " +
+            "motherID TEXT, " +
+            "spouseID TEXT, " +
+            "PRIMARY KEY(personID)" +
             ");";
-    private final String DROP_SQL = "DROP TABLE IF EXISTS Person";
-    private final String INSERT_SQL = "INSERT INTO Event " +
+    private final String DROP_SQL = "DROP TABLE Person";
+    private final String INSERT_SQL = "INSERT INTO Person " +
             "(personID, associatedUsername, firstName, lastName, gender, " +
             "fatherID, motherID, spouseID) " +
             "VALUES (?,?,?,?,?,?,?,?);";
@@ -32,7 +39,7 @@ public class PersonDao {
             "SET associatedUsername = ?, firstName = ?, lastName = ?, " +
             "gender = ?, fatherID = ?, motherID = ?, spouseID = ?" +
             "WHERE personID = ?";
-    private final String SELECT_SQL = "SELECT associatedUsername, firstName, " +
+    private final String SELECT_SQL = "SELECT personID, associatedUsername, firstName, " +
             "lastName, gender, fatherID, motherID, spouseID FROM Person " +
             "WHERE personID = ?";
 
@@ -58,7 +65,7 @@ public class PersonDao {
             stmtCreate.close();
         }
         catch (SQLException e) {
-            throw new DatabaseException("Error resetting Persons table: " + e);
+            throw new DatabaseException("Error resetting Person table: " + e);
         }
     }
 
@@ -77,13 +84,45 @@ public class PersonDao {
     }
 
     /**
+     * Gets a count of all Persons in the Person table
+     * @return The number of Users in the Person table
+     */
+    public int getCountOfAllPersons() throws DatabaseException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+        try {
+            stmt = connection.prepareStatement("SELECT * FROM Person");
+            stmt.executeQuery();
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                count++;
+            }
+            stmt.close();
+            rs.close();
+            return count;
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when getting count from Person table: " + e);
+        }
+    }
+
+    /**
      * Inserts a user into the SQLite Database if they do not already exist in it
+     * @return If the user was successfully inserted
      * @param person Person object to insert
      * @throws DatabaseException Error with database operation
      */
-    public void insertPerson(Person person) throws DatabaseException {
+    public boolean insertPerson(Person person) throws DatabaseException {
         PreparedStatement stmt = null;
         try {
+
+            Person tempPerson = getPersonByPersonID(person.getPersonID());
+            if(tempPerson != null) {
+                return false;
+            }
+
+
             stmt = connection.prepareStatement(INSERT_SQL);
             stmt.setString(1, person.getPersonID());
             stmt.setString(2, person.getAssociatedUsername());
@@ -97,6 +136,7 @@ public class PersonDao {
                 throw new DatabaseException("Error with inserting Person object into database");
             }
             stmt.close();
+            return true;
         }
         catch (Exception e) {
             throw new DatabaseException("SQLException when inserting Person object: " + e);
@@ -127,9 +167,15 @@ public class PersonDao {
      * Empties all Person objects from the Person table
      * @throws DatabaseException Error with database operation
      */
-    public void empty() throws DatabaseException {
+    public void empty() throws DatabaseException, SQLException {
         PreparedStatement stmt = null;
         try {
+
+            int numUsersInTable = getCountOfAllPersons();
+            if(numUsersInTable == 0) {
+                return;
+            }
+
             stmt = connection.prepareStatement(EMPTY_SQL);
             if (stmt.executeUpdate() != 1) {
                 throw new DatabaseException("Error with emptying Person table");
@@ -182,19 +228,20 @@ public class PersonDao {
             stmt = connection.prepareStatement(SELECT_SQL);
             stmt.setString(1, personID);
             rs = stmt.executeQuery();
-            stmt.close();
 
             while (rs.next()) {
-                String associatedUsername = rs.getString(1);
-                String firstName = rs.getString(2);
-                String lastName = rs.getString(3);
-                String gender = rs.getString(4);
-                String fatherID = rs.getString(5);
-                String motherID = rs.getString(6);
-                String spouseID = rs.getString(7);
+                String associatedUsername = rs.getString(2);
+                String firstName = rs.getString(3);
+                String lastName = rs.getString(4);
+                String gender = rs.getString(5);
+                String fatherID = rs.getString(6);
+                String motherID = rs.getString(7);
+                String spouseID = rs.getString(8);
                 person = new Person(personID, associatedUsername, firstName, lastName, gender,
                         fatherID, motherID, spouseID);
             }
+            rs.close();
+            stmt.close();
         }
         catch (Exception e) {
             throw new DatabaseException("SQLException when selecting Person object: " + e);

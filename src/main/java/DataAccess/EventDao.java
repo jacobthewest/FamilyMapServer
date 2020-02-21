@@ -27,7 +27,7 @@ public class EventDao {
             "year NUMERIC, " +
             "PRIMARY KEY(eventID)" +
             ")";
-    private final String DROP_SQL = "DROP TABLE IF EXISTS Event";
+    private final String DROP_SQL = "DROP TABLE Event";
     private final String INSERT = "INSERT INTO Event " +
             "(eventID, associatedUsername, personID, latitude, longitude, " +
             "country, city, eventType, year) " +
@@ -86,12 +86,20 @@ public class EventDao {
 
     /**
      * Inserts an Event object into the database if it doesn't exist in it
+     * @return If the user was successfully inserted
      * @param event An Event object to insert
      * @throws DatabaseException Error with database operation
      */
-    public void insertEvent(Event event) throws DatabaseException{
+    public boolean insertEvent(Event event) throws DatabaseException{
         PreparedStatement stmt = null;
         try {
+
+            Event tempEvent = getEventByEventID(event.getEventID());
+            if(tempEvent != null) {
+                return false;
+            }
+
+
             stmt = connection.prepareStatement(INSERT);
             stmt.setString(1, event.getEventID());
             stmt.setString(2, event.getAssociatedUsername());
@@ -106,6 +114,7 @@ public class EventDao {
                 throw new DatabaseException("Error with inserting Event object into database");
             }
             stmt.close();
+            return true;
         }
         catch (Exception e) {
             throw new DatabaseException("SQLException when inserting Event object: " + e);

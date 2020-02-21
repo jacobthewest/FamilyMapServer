@@ -13,7 +13,7 @@ public class Database {
     private PersonDao personTable;
     private UserDao userTable;
     private Connection connection;
-    private final String DROP_TABLE = "DROP TABLE IF EXISTS ";
+    private final String DROP_TABLE = "DROP TABLE ";
 
     /**
      * Creates a new database by passing itself into the dao classes,
@@ -117,6 +117,7 @@ public class Database {
      */
     public void emptyTables() throws DatabaseException {
         try {
+
             this.authTokenTable.empty();
             this.eventTable.empty();
             this.personTable.empty();

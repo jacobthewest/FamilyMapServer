@@ -30,6 +30,11 @@ public class User {
                 String lastName, String gender, String personID) {
         setUserName(userName);
         setPassWord(passWord);
+        setEmail(email);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setGender(gender);
+        setPersonID(personID);
     }
 
     /**

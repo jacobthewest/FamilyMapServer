@@ -24,8 +24,8 @@ public class UserDao {
             "personID TEXT NOT NULL, " +
             "PRIMARY KEY(userName) " +
             ");";
-    private final String DROP_SQL = "DROP TABLE IF EXISTS User";
-    private final String INSERT_SQL = "INSERT INTO Event " +
+    private final String DROP_SQL = "DROP TABLE User";
+    private final String INSERT_SQL = "INSERT INTO User " +
             "(userName, password, email, firstName, lastName, " +
             "gender, personID) " +
             "VALUES (?,?,?,?,?,?,?);";
@@ -82,12 +82,19 @@ public class UserDao {
 
     /**
      * Inserts a user into the SQLite Database if they do not already exist in it
+     * @return If the user was successfully inserted
      * @param user User object to insert
      * @throws DatabaseException Error with database operation
      */
-    public void insertUser(User user) throws DatabaseException {
+    public boolean insertUser(User user) throws DatabaseException {
         PreparedStatement stmt = null;
         try {
+
+            User tempUser = getUserByUserName(user.getUserName());
+            if(tempUser != null) {
+                return false;
+            }
+
             stmt = connection.prepareStatement(INSERT_SQL);
             stmt.setString(1, user.getUserName());
             stmt.setString(2, user.getPassWord());
@@ -100,8 +107,9 @@ public class UserDao {
                 throw new DatabaseException("Error with inserting User object into database");
             }
             stmt.close();
+            return true;
         }
-        catch (Exception e) {
+        catch (SQLException e) {
             throw new DatabaseException("SQLException when inserting User object: " + e);
         }
     }
@@ -120,22 +128,47 @@ public class UserDao {
             stmt = connection.prepareStatement(SELECT_SQL);
             stmt.setString(1, userName);
             rs = stmt.executeQuery();
-            stmt.close();
 
             while (rs.next()) {
-                String password = rs.getString(1);
-                String email = rs.getString(2);
-                String firstName = rs.getString(3);
-                String lastName = rs.getString(4);
-                String gender = rs.getString(5);
-                String personID = rs.getString(6);
+                String password = rs.getString(2);
+                String email = rs.getString(3);
+                String firstName = rs.getString(4);
+                String lastName = rs.getString(5);
+                String gender = rs.getString(6);
+                String personID = rs.getString(7);
                 user = new User(userName, password, email, firstName, lastName, gender, personID);
             }
+            rs.close();
+            stmt.close();
         }
         catch (Exception e) {
             throw new DatabaseException("SQLException when selecting User object: " + e);
         }
         return user;
+    }
+
+    /**
+     * Gets a count of all Users in the User table
+     * @return The number of Users in the User table
+     */
+    public int getCountOfAllUsers() throws DatabaseException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+        try {
+            stmt = connection.prepareStatement("SELECT * FROM User");
+            stmt.executeQuery();
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                count++;
+            }
+            stmt.close();
+            rs.close();
+            return count;
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when getting count of User table: " + e);
+        }
     }
 
     /**
@@ -165,6 +198,12 @@ public class UserDao {
     public void empty() throws DatabaseException {
         PreparedStatement stmt = null;
         try {
+
+            int numUsersInTable = getCountOfAllUsers();
+            if(numUsersInTable == 0) {
+                return;
+            }
+
             stmt = connection.prepareStatement(EMPTY_SQL);
             if (stmt.executeUpdate() != 1) {
                 throw new DatabaseException("Error with emptying User table");

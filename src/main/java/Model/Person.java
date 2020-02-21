@@ -32,7 +32,8 @@ public class Person {
         setFirstName(firstName);
         setLastName(lastName);
         setGender(gender);
-        setFirstName(fatherID);
+        setFirstName(firstName);
+        setFatherId(fatherID);
         setMotherId(motherID);
         setSpouseId(spouseID);
     }
