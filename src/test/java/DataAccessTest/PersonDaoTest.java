@@ -49,6 +49,8 @@ public class PersonDaoTest {
     @Test
     public void insertPass() throws Exception {
         Person returnedPerson = null;
+        personDao.empty();
+        db.commitConnection(true);
         try {
             setGenericPerson();
             personDao.insertPerson(genericPerson);
@@ -73,7 +75,7 @@ public class PersonDaoTest {
      * @throws Exception Problem with the code used to test the insertion
      */
     @Test
-    public void insertFail() throws Exception {
+    public void insertDuplicate() throws Exception {
         Person duplicatePerson = null;
         try {
             setGenericPerson();
@@ -84,6 +86,28 @@ public class PersonDaoTest {
         } catch (DatabaseException ex) {
             db.commitConnection(false);
         }
+    }
+
+    /**
+     * Tests inserting a user with a personID already in the Database
+     * @throws Exception Error encountered while performing the operation
+     */
+    @Test
+    public void insertPersonByUsedPersonID() throws Exception {
+        boolean myCodeHandledIt;
+        try {
+            setGenericPerson();
+            insertGenericPerson();
+            Person badDataPerson = new Person("personID", "nameUser", "Michael",
+                    "chick", "Vick", "Loves", "Dog", "Fighting");
+            personDao.insertPerson(badDataPerson);
+            myCodeHandledIt = false;
+            db.commitConnection(true);
+        } catch(Exception e) {
+            db.commitConnection(false);
+            myCodeHandledIt = true;
+        }
+        assertTrue(myCodeHandledIt);
     }
 
     /**

@@ -13,7 +13,6 @@ public class Database {
     private PersonDao personTable;
     private UserDao userTable;
     private Connection connection;
-    private final String DROP_TABLE = "DROP TABLE ";
 
     /**
      * Creates a new database by passing itself into the dao classes,
@@ -137,10 +136,10 @@ public class Database {
         PreparedStatement dropPersonTable = null;
         PreparedStatement dropUserTable = null;
         try {
-            dropAuthTokenTable = connection.prepareStatement(DROP_TABLE + "AuthToken");
-            dropEventTable = connection.prepareStatement(DROP_TABLE + "Event");
-            dropPersonTable = connection.prepareStatement(DROP_TABLE + "Person");
-            dropUserTable = connection.prepareStatement(DROP_TABLE + "User");
+            dropAuthTokenTable = connection.prepareStatement("DROP TABLE AuthToken");
+            dropEventTable = connection.prepareStatement("DROP TABLE Event");
+            dropPersonTable = connection.prepareStatement("DROP TABLE Person");
+            dropUserTable = connection.prepareStatement("DROP TABLE User");
 
             dropAuthTokenTable.executeUpdate();
             dropEventTable.executeUpdate();

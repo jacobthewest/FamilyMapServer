@@ -52,6 +52,8 @@ public class UserDaoTest {
     @Test
     public void insertPass() throws Exception {
         User returnedUser = null;
+        userDao.empty();
+        db.commitConnection(true);
         try {
             setGenericUser();
             userDao.insertUser(this.genericUser);
@@ -75,7 +77,7 @@ public class UserDaoTest {
      * @throws Exception Problem with the code used to test the insertion
      */
     @Test
-    public void insertFail() throws Exception {
+    public void insertDuplicate() throws Exception {
         User duplicateUser = null;
         try {
             setGenericUser();
@@ -87,6 +89,49 @@ public class UserDaoTest {
             db.commitConnection(false);
         }
     }
+
+    /**
+     * Tests inserting a user with a gender other than "m" or "f"
+     * @throws Exception Error encountered while performing the operation
+     */
+    @Test
+    public void insertUserWithNonOptionGender() throws Exception {
+        boolean myCodeHandledIt;
+        try {
+            User badDataUser = new User("badUserName", "pass@word1", "your_mom@gmail.com",
+                    "Rick", "James", "dude", "abc123");
+            userDao.insertUser(badDataUser);
+            myCodeHandledIt = false;
+            db.commitConnection(true);
+        } catch(Exception e) {
+            db.commitConnection(false);
+            myCodeHandledIt = true;
+        }
+        assertTrue(myCodeHandledIt);
+    }
+
+    /**
+     * Tests inserting a user with a userName that has already been used
+     * @throws Exception Error encountered while performing the operation
+     */
+    @Test
+    public void insertUserByUsedUserName() throws Exception {
+        boolean myCodeHandledIt;
+        try {
+            setGenericUser();
+            insertGenericUser();
+            User badDataUser = new User("badUserName", "pass@word1", "your_mom@gmail.com",
+                    "Rick", "James", "dude", "abc123");
+            userDao.insertUser(badDataUser);
+            myCodeHandledIt = false;
+            db.commitConnection(true);
+        } catch(Exception e) {
+            db.commitConnection(false);
+            myCodeHandledIt = true;
+        }
+        assertTrue(myCodeHandledIt);
+    }
+
 
     /**
      * Tests returning a user that exists in the database
@@ -122,8 +167,8 @@ public class UserDaoTest {
         try {
             setGenericUser();
             insertGenericUser();
-            User nonexistentUser = new User("abc", "def", "ghi@email.com",
-                    "Chuck", "Norris", "m", "chuckID");
+//            User nonexistentUser = new User("abc", "def", "ghi@email.com",
+//                    "Chuck", "Norris", "m", "chuckID");
             returnedUser = userDao.getUserByUserName("abc");
         } catch (DatabaseException ex) {
             db.commitConnection(false);

@@ -107,6 +107,7 @@ public class PersonDao {
         }
     }
 
+
     /**
      * Inserts a user into the SQLite Database if they do not already exist in it
      * @return If the user was successfully inserted
@@ -119,9 +120,12 @@ public class PersonDao {
 
             Person tempPerson = getPersonByPersonID(person.getPersonID());
             if(tempPerson != null) {
-                return false;
+                throw new DatabaseException("User already exist with personID: " + person.getPersonID());
             }
 
+            if(!person.getGender().equals("m") && !person.getGender().equals("f")) {
+                throw new DatabaseException("Gender provided other than \"m\" or \"f\"");
+            }
 
             stmt = connection.prepareStatement(INSERT_SQL);
             stmt.setString(1, person.getPersonID());
@@ -170,9 +174,8 @@ public class PersonDao {
     public void empty() throws DatabaseException, SQLException {
         PreparedStatement stmt = null;
         try {
-
-            int numUsersInTable = getCountOfAllPersons();
-            if(numUsersInTable == 0) {
+            int numPersons = getCountOfAllPersons();
+            if(numPersons == 0) {
                 return;
             }
 
@@ -249,7 +252,27 @@ public class PersonDao {
         return person;
     }
 
+    /**
+     * Checks to see if a Person table exists and can be accessed
+     * @return If the table is able to be accessed
+     * @throws DatabaseException An error performing the operation
+     */
+    public boolean canAccessTable() throws DatabaseException {
+        try {
+            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM Person");
+            stmt.executeQuery();
+            stmt.close();
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
+    }
+
     public void setConnection(Connection connection) {
         this.connection = connection;
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }

@@ -39,8 +39,7 @@ public class EventDao {
             "SET associatedUsername = ?, personID = ?, latitude = ?, " +
             "longitude = ?, country = ?, city = ?, eventType = ?, year = ?" +
             "WHERE eventID = ?";
-    private final String SELECT_SQL = "SELECT associatedUsername, personID, " +
-            "latitude, longitude, country, city, eventType, year FROM Event " +
+    private final String SELECT_SQL = "SELECT * FROM Event " +
             "WHERE eventID = ?";
 
     /**
@@ -70,6 +69,30 @@ public class EventDao {
     }
 
     /**
+     * Gets a count of all Users in the User table
+     * @return The number of Users in the User table
+     */
+    public int getCountOfAllEvents() throws DatabaseException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+        try {
+            stmt = connection.prepareStatement("SELECT * FROM Event");
+            stmt.executeQuery();
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                count++;
+            }
+            stmt.close();
+            rs.close();
+            return count;
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when getting count of Event table: " + e);
+        }
+    }
+
+    /**
      * Creates an Event table in the database if it doesn't already exist
      * @throws DatabaseException Error with database operation
      */
@@ -93,12 +116,10 @@ public class EventDao {
     public boolean insertEvent(Event event) throws DatabaseException{
         PreparedStatement stmt = null;
         try {
-
             Event tempEvent = getEventByEventID(event.getEventID());
             if(tempEvent != null) {
-                return false;
+                throw new DatabaseException("Event already exists with eventID: " + event.getEventID());
             }
-
 
             stmt = connection.prepareStatement(INSERT);
             stmt.setString(1, event.getEventID());
@@ -148,10 +169,18 @@ public class EventDao {
     public void empty() throws DatabaseException{
         PreparedStatement stmt = null;
         try {
+            int numEvents = getCountOfAllEvents();
+            if(numEvents == 0) {
+                return;
+            }
+
             stmt = connection.prepareStatement(EMPTY_SQL);
             if (stmt.executeUpdate() != 1) {
-                throw new DatabaseException("Error with emptying Event table");
+                throw new DatabaseException("Error with emptying Person table");
             }
+            stmt.close();
+            stmt = connection.prepareStatement(EMPTY_SQL);
+            stmt.executeUpdate();
             stmt.close();
         }
         catch (Exception e) {
@@ -202,21 +231,22 @@ public class EventDao {
             stmt = connection.prepareStatement(SELECT_SQL);
             stmt.setString(1, eventID);
             rs = stmt.executeQuery();
-            stmt.close();
 
             while (rs.next()) {
-                String associatedUsername = rs.getString(1);
-                String personID = rs.getString(2);
-                double latitude = rs.getDouble(3);
-                double longitude = rs.getDouble(4);
-                String country = rs.getString(5);
-                String city = rs.getString(6);
-                String eventType = rs.getString(7);
-                int year = rs.getInt(8);
+                String associatedUsername = rs.getString(2);
+                String personID = rs.getString(3);
+                double latitude = rs.getDouble(4);
+                double longitude = rs.getDouble(5);
+                String country = rs.getString(6);
+                String city = rs.getString(7);
+                String eventType = rs.getString(8);
+                int year = rs.getInt(9);
 
                 event = new Event(eventID, associatedUsername, personID, latitude, longitude,
                         country, city, eventType, year);
             }
+            if(rs != null) rs.close();
+            if(stmt != null) stmt.close();
         }
         catch (Exception e) {
             throw new DatabaseException("SQLException when selecting Event object: " + e);
@@ -224,7 +254,27 @@ public class EventDao {
         return event;
     }
 
+    /**
+     * Checks to see if an Event table exists and can be accessed
+     * @return If the table is able to be accessed
+     * @throws DatabaseException An error performing the operation
+     */
+    public boolean canAccessTable() throws DatabaseException {
+        try {
+            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM Event");
+            stmt.executeQuery();
+            stmt.close();
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
+    }
+
     public void setConnection(Connection connection) {
         this.connection = connection;
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }

@@ -92,7 +92,11 @@ public class UserDao {
 
             User tempUser = getUserByUserName(user.getUserName());
             if(tempUser != null) {
-                return false;
+                throw new DatabaseException("User already exists under username: " + user.getUserName());
+            }
+
+            if(!user.getGender().equals("m") && !user.getGender().equals("f")) {
+                throw new DatabaseException("Gender provided other than \"m\" or \"f\"");
             }
 
             stmt = connection.prepareStatement(INSERT_SQL);
@@ -198,7 +202,6 @@ public class UserDao {
     public void empty() throws DatabaseException {
         PreparedStatement stmt = null;
         try {
-
             int numUsersInTable = getCountOfAllUsers();
             if(numUsersInTable == 0) {
                 return;
@@ -243,5 +246,25 @@ public class UserDao {
 
     public void setConnection(Connection connection) {
         this.connection = connection;
+    }
+
+    /**
+     * Checks to see if a User table exists and can be accessed
+     * @return If the table is able to be accessed
+     * @throws DatabaseException An error performing the operation
+     */
+    public boolean canAccessTable() throws DatabaseException {
+        try {
+            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM User");
+            stmt.executeQuery();
+            stmt.close();
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }

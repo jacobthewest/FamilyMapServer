@@ -13,10 +13,12 @@ public class AuthTokenDao {
 
     private Connection connection;
     private final String DROP_SQL = "DROP TABLE AuthToken";
+    private final String EMPTY_SQL = "DELETE FROM AuthToken";
     private final String CREATE_SQL = "CREATE TABLE IF NOT EXISTS AuthToken " +
             "(" +
             "token TEXT NOT NULL, " +
-            "userName TEXT NOT NULL" +
+            "userName TEXT NOT NULL," +
+            "PRIMARY KEY(token)" +
             ");";
     private final String INSERT = "INSERT INTO AuthToken " +
             "(token, userName) " +
@@ -77,12 +79,6 @@ public class AuthTokenDao {
     public boolean insertAuthToken(AuthToken authToken) throws DatabaseException {
         PreparedStatement stmt = null;
         try {
-
-            AuthToken tempToken = getAuthTokenByUserName(authToken.getUserName());
-            if(tempToken != null) {
-                return false;
-            }
-
             stmt = connection.prepareStatement(INSERT);
             stmt.setString(1, authToken.getToken());
             stmt.setString(2, authToken.getUserName());
@@ -125,8 +121,13 @@ public class AuthTokenDao {
     public void empty() throws DatabaseException {
         PreparedStatement stmt = null;
         try {
-            String EMPTY_SQL = "DELETE FROM AuthToken";
+            int numAuthTokens = getCountOfAllAuthTokens();
+            if(numAuthTokens == 0) {
+                return;
+            }
+
             stmt = connection.prepareStatement(EMPTY_SQL);
+            stmt.executeUpdate();
             stmt.close();
         }
         catch (Exception e) {
@@ -141,6 +142,31 @@ public class AuthTokenDao {
      */
     public void updateAuthToken(AuthToken authToken) throws DatabaseException {
 
+    }
+
+
+    /**
+     * Gets a count of all AuthTokens in the AuthToken table
+     * @return The number of AuthTokens in the AuthToken table
+     */
+    public int getCountOfAllAuthTokens() throws DatabaseException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+        try {
+            stmt = connection.prepareStatement("SELECT * FROM AuthToken");
+            stmt.executeQuery();
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                count++;
+            }
+            stmt.close();
+            rs.close();
+            return count;
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when getting count of AuthToken table: " + e);
+        }
     }
 
     /**
@@ -188,19 +214,35 @@ public class AuthTokenDao {
             stmt = connection.prepareStatement(SELECT_BY_USER_NAME);
             stmt.setString(1, userName);
             rs = stmt.executeQuery();
-            stmt.close();
 
             String token = null;
             while (rs.next()) {
                 token = rs.getString(1);
+                authToken = new AuthToken(token, userName);
             }
-
-            authToken = new AuthToken(token, userName);
+            if(rs != null) rs.close();
+            if(stmt != null) stmt.close();
         }
         catch (Exception e) {
             throw new DatabaseException("SQLException when selecting AuthToken object: " + e);
         }
         return authToken;
+    }
+
+    /**
+     * Checks to see if an AuthToken table exists and can be accessed
+     * @return If the table is able to be accessed
+     * @throws DatabaseException An error performing the operation
+     */
+    public boolean canAccessTable() throws DatabaseException {
+        try {
+            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM AuthToken");
+            stmt.executeQuery();
+            stmt.close();
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
     }
 
     public Connection getConnection() {
