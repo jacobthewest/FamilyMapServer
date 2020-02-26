@@ -19,7 +19,6 @@ public class RegisterRequest {
      * @param user A User object to register with the database
      */
     public RegisterRequest(User user) {
-        super();
         setUser(user);
     }
 

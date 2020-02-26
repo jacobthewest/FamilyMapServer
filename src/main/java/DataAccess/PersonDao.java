@@ -253,6 +253,48 @@ public class PersonDao {
     }
 
     /**
+     * Returns all immediate family members of the Person with the associatedUsername
+     *
+     * @param associatedUsername the associatedUsername of the Person for immediate
+     *                           family member retrieval
+     * @return Array of Person objects representing the Person, and if not null, the Person's
+     *                           father, mother, and spouse. Array order is Person, Father,
+     *                           Mother, Spouse
+     * @throws DatabaseException Error performing the operation
+     */
+    public Person[] getAllPersons(String associatedUsername) throws DatabaseException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Person self = null;
+        Person father = null;
+        Person mother = null;
+        Person spouse = null;
+        try {
+            stmt = connection.prepareStatement("SELECT personID FROM PERSON WHERE " +
+                    "associatedUsername = ?");
+            stmt.setString(1, associatedUsername);
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                String selfID = rs.getString(1);
+                self = getPersonByPersonID(selfID);
+                if(self.getFatherId() != null) {
+                    father = getPersonByPersonID(self.getFatherId());
+                }
+                if(self.getMotherId() != null) {
+                    mother = getPersonByPersonID(self.getMotherId());
+                }
+                if(self.getSpouseId() != null) {
+                    spouse = getPersonByPersonID(self.getSpouseId());
+                }
+            }
+            Person[] returnArray = {self, father, mother, spouse};
+            return returnArray;
+        } catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Checks to see if a Person table exists and can be accessed
      * @return If the table is able to be accessed
      * @throws DatabaseException An error performing the operation
@@ -265,6 +307,31 @@ public class PersonDao {
             return true;
         } catch(Exception e) {
             return false;
+        }
+    }
+
+    /**
+     * Creates a person object from a ResultSet that came from a query
+     * @param rs A ResultSet that came from a query
+     * @return A person object created from the ResultSet
+     * @throws DatabaseException An Error with the operation.
+     */
+    public Person getSelf(ResultSet rs) throws DatabaseException {
+        try {
+            String personID = rs.getString(1);
+            String associatedUsername = rs.getString(2);
+            String firstName = rs.getString(3);
+            String lastName = rs.getString(4);
+            String gender = rs.getString(5);
+            String fatherID = rs.getString(6);
+            String motherID = rs.getString(7);
+            String spouseID = rs.getString(8);
+
+            Person self = new Person(personID, associatedUsername, firstName, lastName, gender,
+                    fatherID, motherID, spouseID);
+            return self;
+        } catch(Exception e) {
+            return null;
         }
     }
 

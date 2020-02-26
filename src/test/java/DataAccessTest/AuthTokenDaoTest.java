@@ -19,7 +19,7 @@ public class AuthTokenDaoTest {
     private AuthToken authToken;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() throws DatabaseException {
         db = new Database();
         db.loadDriver();
         db.openConnection();
@@ -32,7 +32,7 @@ public class AuthTokenDaoTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() throws DatabaseException {
         try {
             db.emptyDatabase();
             db.commitConnection(true);
@@ -42,17 +42,17 @@ public class AuthTokenDaoTest {
             this.db = null;
             this.authTokenDao = null;
         } catch(Exception ex) {
-            throw new Exception("Jacob, error: " + ex);
+            throw new DatabaseException("Jacob, error: " + ex);
         }
 
     }
 
     /**
      * Inserts a non existent AuthToken with correct data
-     * @throws Exception Problem with the code used to test the insertion
+     * @throws DatabaseException Problem with the code used to test the insertion
      */
     @Test
-    public void insertPass() throws Exception {
+    public void insertPass() throws DatabaseException {
         AuthToken returnedAuthToken = null;
         authTokenDao.empty();
         db.commitConnection(true);
@@ -70,10 +70,10 @@ public class AuthTokenDaoTest {
 
     /**
      * Inserts a non existent AuthToken, then tries to insert a duplicate AuthToken
-     * @throws Exception Problem with the code used to test the insertion
+     * @throws DatabaseException Problem with the code used to test the insertion
      */
     @Test
-    public void insertDuplicate() throws Exception {
+    public void insertDuplicate() throws DatabaseException {
         AuthToken duplicateAuthToken = null;
         try {
             setGenericAuthToken();
@@ -88,10 +88,10 @@ public class AuthTokenDaoTest {
 
     /**
      * Tests inserting a AuthToken with a token that has already been used
-     * @throws Exception Error encountered while performing the operation
+     * @throws DatabaseException Error encountered while performing the operation
      */
     @Test
-    public void insertAuthTokenByUsedToken() throws Exception {
+    public void insertAuthTokenByUsedToken() throws DatabaseException {
         boolean myCodeHandledIt;
         try {
             setGenericAuthToken();
@@ -100,7 +100,7 @@ public class AuthTokenDaoTest {
             authTokenDao.insertAuthToken(badDataAuthToken);
             myCodeHandledIt = false;
             db.commitConnection(true);
-        } catch(Exception e) {
+        } catch(DatabaseException e) {
             db.commitConnection(false);
             myCodeHandledIt = true;
         }
@@ -110,10 +110,10 @@ public class AuthTokenDaoTest {
 
     /**
      * Tests returning an AuthToken that exists in the database
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void retrievePass() throws Exception {
+    public void retrievePass() throws DatabaseException {
         AuthToken returnedAuthToken = null;
         try {
             setGenericAuthToken();
@@ -129,10 +129,10 @@ public class AuthTokenDaoTest {
 
     /**
      * Tries to return an AuthToken that does not exist in the database
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void retrieveFail() throws Exception {
+    public void retrieveFail() throws DatabaseException {
         AuthToken returnedAuthToken = null;
         try {
             setGenericAuthToken();
@@ -146,10 +146,10 @@ public class AuthTokenDaoTest {
 
     /**
      * Tries to clear all data from the AuthToken table
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void clearPass() throws Exception {
+    public void clearPass() throws DatabaseException {
         try {
             setGenericAuthToken();
             insertGenericAuthToken();
@@ -166,7 +166,7 @@ public class AuthTokenDaoTest {
         this.authToken = new AuthToken("token", "userName");
     }
 
-    public void insertGenericAuthToken() throws Exception {
+    public void insertGenericAuthToken() throws DatabaseException {
         setGenericAuthToken();
         authTokenDao.insertAuthToken(this.authToken);
         db.commitConnection(true);

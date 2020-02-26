@@ -15,7 +15,6 @@ public class LoginRequest {
      * @param password The password of the User we want to login
      */
     public LoginRequest(String userName, String password) {
-        super();
         setUserName(userName);
         setPassword(password);
     }
@@ -30,5 +29,9 @@ public class LoginRequest {
 
     public String getUserName() {
         return userName;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

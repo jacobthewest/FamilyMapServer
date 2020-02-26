@@ -22,7 +22,7 @@ public class DatabaseTest {
     private AuthTokenDao authTokenTable;
 
     @BeforeEach
-    public void setUp() throws Exception{
+    public void setUp() throws DatabaseException{
         db = new Database();
         userTable = new UserDao();
         personTable = new PersonDao();
@@ -31,7 +31,7 @@ public class DatabaseTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() throws DatabaseException {
         db = null;
         connection = null;
         userTable = null;
@@ -42,10 +42,10 @@ public class DatabaseTest {
 
     /**
      * Tests the function that loads the database driver
-     * @throws Exception Error with performing the operation
+     * @throws DatabaseException Error with performing the operation
      */
     @Test
-    public void testLoadDriver() throws Exception{
+    public void testLoadDriver() throws DatabaseException{
         boolean myCodeWorked;
         try {
             db.loadDriver();
@@ -58,10 +58,10 @@ public class DatabaseTest {
 
     /**
      * Tests opening a connection for the database
-     * @throws Exception Error with performing the operation
+     * @throws DatabaseException Error with performing the operation
      */
     @Test
-    public void testOpenConnection() throws Exception {
+    public void testOpenConnection() throws DatabaseException {
         boolean myCodeWorked;
         try {
             db.loadDriver();
@@ -76,10 +76,10 @@ public class DatabaseTest {
 
     /**
      * Tests setting the connection for the tables
-     * @throws Exception Error with performing the operation
+     * @throws DatabaseException Error with performing the operation
      */
     @Test
-    public void testSettingTableConnections() throws Exception {
+    public void testSettingTableConnections() throws DatabaseException {
         boolean myCodeWorked = true;
         try {
             db.loadDriver();
@@ -105,10 +105,10 @@ public class DatabaseTest {
 
     /**
      * Tests setting up the tables correctly
-     * @throws Exception Error with performing the operation
+     * @throws DatabaseException Error with performing the operation
      */
     @Test
-    public void testInitializeTablesPass() throws Exception {
+    public void testInitializeTablesPass() throws DatabaseException {
         boolean myCodeWorked;
         try {
             db.loadDriver();
@@ -143,10 +143,10 @@ public class DatabaseTest {
 
     /**
      * Tests dropping all of the tables from the database
-     * @throws Exception Error while performing the operation
+     * @throws DatabaseException Error while performing the operation
      */
     @Test
-    public void testEmptyDatabase() throws Exception {
+    public void testEmptyDatabase() throws DatabaseException {
         PreparedStatement stmt = null;
         try {
             emptyTableDatabaseTestSetUp();
@@ -163,7 +163,7 @@ public class DatabaseTest {
         assertFalse(personTable.canAccessTable());
     }
 
-    public void emptyTableDatabaseTestSetUp() throws Exception {
+    public void emptyTableDatabaseTestSetUp() throws DatabaseException {
         db.loadDriver();
         db.openConnection();
         connection = db.getConnection();

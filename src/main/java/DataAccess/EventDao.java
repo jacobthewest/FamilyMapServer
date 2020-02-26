@@ -24,7 +24,7 @@ public class EventDao {
             "country TEXT NOT NULL, " +
             "city TEXT NOT NULL, " +
             "eventType TEXT NOT NULL, " +
-            "year NUMERIC, " +
+            "year NUMERIC NOT NULL, " +
             "PRIMARY KEY(eventID)" +
             ")";
     private final String DROP_SQL = "DROP TABLE Event";

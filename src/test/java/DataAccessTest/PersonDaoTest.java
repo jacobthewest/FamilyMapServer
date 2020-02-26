@@ -4,7 +4,6 @@ import DataAccess.Database;
 import DataAccess.DatabaseException;
 import DataAccess.PersonDao;
 import Model.Person;
-import Model.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,9 +16,12 @@ public class PersonDaoTest {
     private Database db;
     private PersonDao personDao;
     private Person genericPerson;
+    private Person father;
+    private Person mother;
+    private Person spouse;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() throws DatabaseException {
         db = new Database();
         db.loadDriver();
         db.openConnection();
@@ -32,31 +34,34 @@ public class PersonDaoTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() throws DatabaseException {
         db.emptyDatabase();
         db.commitConnection(true);
         db.closeConnection();
 
         this.genericPerson = null;
+        this.father = null;
+        this.mother = null;
+        this.spouse = null;
         this.db = null;
         this.personDao = null;
     }
 
     /**
      * Inserts a non existent Person with correct data
-     * @throws Exception Problem with the code used to test the insertion
+     * @throws DatabaseException Problem with the code used to test the insertion
      */
     @Test
-    public void insertPass() throws Exception {
+    public void insertPass() throws DatabaseException {
         Person returnedPerson = null;
-        personDao.empty();
-        db.commitConnection(true);
         try {
+            personDao.empty();
+            db.commitConnection(true);
             setGenericPerson();
-            personDao.insertPerson(genericPerson);
+            insertGenericPerson();
             db.commitConnection(true);
             returnedPerson = personDao.getPersonByPersonID("personID");
-        } catch (DatabaseException ex) {
+        } catch (Exception ex) {
             db.commitConnection(false);
         }
 
@@ -72,14 +77,14 @@ public class PersonDaoTest {
 
     /**
      * Inserts a non existent Person, then tries to insert a duplicate Person
-     * @throws Exception Problem with the code used to test the insertion
+     * @throws DatabaseException Problem with the code used to test the insertion
      */
     @Test
-    public void insertDuplicate() throws Exception {
+    public void insertDuplicate() throws DatabaseException {
         Person duplicatePerson = null;
         try {
             setGenericPerson();
-            personDao.insertPerson(genericPerson);
+            insertGenericPerson();
             duplicatePerson = genericPerson;
             personDao.insertPerson(duplicatePerson);
             db.commitConnection(true);
@@ -90,10 +95,10 @@ public class PersonDaoTest {
 
     /**
      * Tests inserting a user with a personID already in the Database
-     * @throws Exception Error encountered while performing the operation
+     * @throws DatabaseException Error encountered while performing the operation
      */
     @Test
-    public void insertPersonByUsedPersonID() throws Exception {
+    public void insertPersonByUsedPersonID() throws DatabaseException {
         boolean myCodeHandledIt;
         try {
             setGenericPerson();
@@ -112,10 +117,10 @@ public class PersonDaoTest {
 
     /**
      * Tests returning a Person that exists in the database
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void retrievePass() throws Exception {
+    public void retrievePass() throws DatabaseException {
         Person returnedPerson = null;
         try {
             setGenericPerson();
@@ -137,10 +142,10 @@ public class PersonDaoTest {
 
     /**
      * Tries to return a user that does not exist in the database
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void retrieveFail() throws Exception {
+    public void retrieveFail() throws DatabaseException {
         Person returnedPerson = null;
         try {
             setGenericPerson();
@@ -156,31 +161,121 @@ public class PersonDaoTest {
 
     /**
      * Tries to clear all data from the User table
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void clearPass() throws Exception {
+    public void clearPass() throws DatabaseException {
         try {
-            setGenericPerson();
             insertGenericPerson();
             personDao.empty();
             db.commitConnection(true);
-        } catch (DatabaseException ex) {
+        } catch (Exception ex) {
             db.commitConnection(false);
         }
         int newCount = personDao.getCountOfAllPersons();
         assertEquals(newCount, 0);
     }
 
+    /**
+     * Passing test for getting Person and Person's family members
+     * @throws DatabaseException
+     */
+    @Test
+    public void getAllPersonsPass() throws DatabaseException {
+        boolean codeWorked;
+        try {
+            insertGenericPerson();
+            insertFather();
+            insertMother();
+            insertSpouse();
 
-    public void setGenericPerson() {
+            Person[] array = this.personDao.getAllPersons(this.genericPerson.getAssociatedUsername());
+            assertPerson(this.genericPerson, array[0]); // Person
+            assertPerson(this.father, array[1]); // Father
+            assertPerson(this.mother, array[2]); // Mother
+            assertPerson(this.spouse, array[3]); // Spouse
+
+            codeWorked = true;
+        } catch(Exception e) {
+            codeWorked = false;
+        }
+        assertTrue(codeWorked);
+    }
+
+    /**
+     * Failing test for getting Person and Person's family members
+     * @throws DatabaseException
+     */
+    @Test
+    public void getAllPersonsFail() throws DatabaseException {
+        boolean codeWorked;
+        try {
+            insertGenericPerson();
+            insertBadDad();
+            insertMother();
+            insertSpouse();
+
+            Person[] array = this.personDao.getAllPersons(this.genericPerson.getAssociatedUsername());
+            assertPerson(this.genericPerson, array[0]); // Person
+            assertPerson(this.father, array[1]); // Father
+            assertPerson(this.mother, array[2]); // Mother
+            assertPerson(this.spouse, array[3]); // Spouse
+
+            codeWorked = false;
+        } catch(Exception e) {
+            codeWorked = true;
+        }
+        assertTrue(codeWorked);
+    }
+
+
+    public void setGenericPerson() throws DatabaseException {
         this.genericPerson = new Person("personID","associatedUsername", "firstName",
                 "lastName", "m", "fatherID", "motherID", "spouseID");
     }
 
-    public void insertGenericPerson() throws Exception {
+    public void insertFather() throws DatabaseException {
+        this.father = new Person("fatherID","fatherUsername", "daddy",
+                "pops", "m", null, null, null);
+        personDao.insertPerson(father);
+        db.commitConnection(true);
+    }
+
+    public void insertBadDad() throws DatabaseException {
+        this.father = new Person("nonExistentFatherPersonID","fatherUsername", "daddy",
+                "pops", "m", null, null, null);
+        personDao.insertPerson(father);
+        db.commitConnection(true);
+    }
+
+    public void insertMother() throws DatabaseException {
+        this.mother = new Person("motherID","motherUsername", "mommy",
+                "motherDearest", "f", null, null, null);
+        personDao.insertPerson(mother);
+        db.commitConnection(true);
+    }
+
+    public void insertSpouse() throws DatabaseException {
+        this.spouse = new Person("spouseID","spouseUsername", "hottie",
+                "wifey", "f", null, null, null);
+        personDao.insertPerson(spouse);
+        db.commitConnection(true);
+    }
+
+    public void insertGenericPerson() throws DatabaseException {
         setGenericPerson();
         personDao.insertPerson(genericPerson);
         db.commitConnection(true);
+    }
+
+    public void assertPerson(Person initialPerson, Person person) {
+        assertEquals(initialPerson.getPersonID(), person.getPersonID());
+        assertEquals(initialPerson.getAssociatedUsername(), person.getAssociatedUsername());
+        assertEquals(initialPerson.getFirstName(), person.getFirstName());
+        assertEquals(initialPerson.getLastName(), person.getLastName());
+        assertEquals(initialPerson.getGender(), person.getGender());
+        assertEquals(initialPerson.getFatherId(), person.getFatherId());
+        assertEquals(initialPerson.getMotherId(), person.getMotherId());
+        assertEquals(initialPerson.getSpouseId(), person.getSpouseId());
     }
 }

@@ -20,7 +20,7 @@ public class EventDaoTest {
     private Event eventObject;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() throws DatabaseException {
         db = new Database();
         db.loadDriver();
         db.openConnection();
@@ -33,7 +33,7 @@ public class EventDaoTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() throws DatabaseException {
         db.emptyDatabase();
         db.commitConnection(true);
         db.closeConnection();
@@ -45,10 +45,10 @@ public class EventDaoTest {
 
     /**
      * Inserts a non existent event with correct data
-     * @throws Exception Problem with the code used to test the insertion
+     * @throws DatabaseException Problem with the code used to test the insertion
      */
     @Test
-    public void insertPass() throws Exception {
+    public void insertPass() throws DatabaseException {
         Event returnedEvent = null;
         eventDao.empty();
         db.commitConnection(true);
@@ -76,10 +76,10 @@ public class EventDaoTest {
     /**
      * Tests inserting an event an eventID that already exists. Our table enforces unique eventID's
      * so this should not be possible.
-     * @throws Exception Error encountered while performing the operation
+     * @throws DatabaseException Error encountered while performing the operation
      */
     @Test
-    public void insertNewEventWithPreviouslyUsedEventID() throws Exception {
+    public void insertNewEventWithPreviouslyUsedEventID() throws DatabaseException {
         boolean myCodeWorked;
         try {
             setEventObject();
@@ -99,10 +99,10 @@ public class EventDaoTest {
 
     /**
      * Tests returning an Event that exists in the database
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void retrievePass() throws Exception {
+    public void retrievePass() throws DatabaseException {
         Event returnedEvent = null;
         try {
             setEventObject();
@@ -125,10 +125,10 @@ public class EventDaoTest {
 
     /**
      * Tries to return an Event that does not exist in the database
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void retrieveFail() throws Exception {
+    public void retrieveFail() throws DatabaseException {
         Event returnedEvent = null;
         try {
             setEventObject();
@@ -146,10 +146,10 @@ public class EventDaoTest {
 
     /**
      * Tries to clear all data from the Event table
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void clearPass() throws Exception {
+    public void clearPass() throws DatabaseException {
         try {
             setEventObject();
             insertEventObject();
@@ -166,7 +166,7 @@ public class EventDaoTest {
                 12.214,"country", "city", "eventType", 2019);
     }
 
-    public void insertEventObject() throws Exception {
+    public void insertEventObject() throws DatabaseException {
         setEventObject();
         eventDao.insertEvent(this.eventObject);
         db.commitConnection(true);

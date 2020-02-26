@@ -22,7 +22,6 @@ public class LoadRequest {
      *               of the users in the users array
      */
     public LoadRequest(User[] users, Person[] persons, Event[] events) {
-        super();
         setUsers(users);
         setPersons(persons);
         setEvents(events);

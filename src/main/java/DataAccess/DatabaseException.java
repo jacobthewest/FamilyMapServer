@@ -8,7 +8,7 @@ public class DatabaseException extends Exception{
      * Constructor for DatabaseException. Creates a new DatabaseException
      * @param message String message for the DatabaseException.
      */
-    DatabaseException(String message)
+    public DatabaseException(String message)
     {
         super(message);
     }

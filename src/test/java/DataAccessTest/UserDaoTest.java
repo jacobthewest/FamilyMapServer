@@ -22,7 +22,7 @@ public class UserDaoTest {
     private User genericUser;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() throws DatabaseException {
         db = new Database();
         db.loadDriver();
         db.openConnection();
@@ -35,7 +35,7 @@ public class UserDaoTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() throws DatabaseException {
         db.emptyDatabase();
         db.commitConnection(true);
         db.closeConnection();
@@ -47,10 +47,10 @@ public class UserDaoTest {
 
     /**
      * Inserts a non existent user with correct data
-     * @throws Exception Problem with the code used to test the insertion
+     * @throws DatabaseException Problem with the code used to test the insertion
      */
     @Test
-    public void insertPass() throws Exception {
+    public void insertPass() throws DatabaseException {
         User returnedUser = null;
         userDao.empty();
         db.commitConnection(true);
@@ -74,10 +74,10 @@ public class UserDaoTest {
 
     /**
      * Inserts a non existent user, then tries to insert a duplicate user
-     * @throws Exception Problem with the code used to test the insertion
+     * @throws DatabaseException Problem with the code used to test the insertion
      */
     @Test
-    public void insertDuplicate() throws Exception {
+    public void insertDuplicate() throws DatabaseException {
         User duplicateUser = null;
         try {
             setGenericUser();
@@ -92,10 +92,10 @@ public class UserDaoTest {
 
     /**
      * Tests inserting a user with a gender other than "m" or "f"
-     * @throws Exception Error encountered while performing the operation
+     * @throws DatabaseException Error encountered while performing the operation
      */
     @Test
-    public void insertUserWithNonOptionGender() throws Exception {
+    public void insertUserWithNonOptionGender() throws DatabaseException {
         boolean myCodeHandledIt;
         try {
             User badDataUser = new User("badUserName", "pass@word1", "your_mom@gmail.com",
@@ -112,10 +112,10 @@ public class UserDaoTest {
 
     /**
      * Tests inserting a user with a userName that has already been used
-     * @throws Exception Error encountered while performing the operation
+     * @throws DatabaseException Error encountered while performing the operation
      */
     @Test
-    public void insertUserByUsedUserName() throws Exception {
+    public void insertUserByUsedUserName() throws DatabaseException {
         boolean myCodeHandledIt;
         try {
             setGenericUser();
@@ -135,10 +135,10 @@ public class UserDaoTest {
 
     /**
      * Tests returning a user that exists in the database
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void retrievePass() throws Exception {
+    public void retrievePass() throws DatabaseException {
         User returnedUser = null;
         try {
             setGenericUser();
@@ -159,10 +159,10 @@ public class UserDaoTest {
 
     /**
      * Tries to return a user that does not exist in the database
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void retrieveFail() throws Exception {
+    public void retrieveFail() throws DatabaseException {
         User returnedUser = null;
         try {
             setGenericUser();
@@ -178,10 +178,10 @@ public class UserDaoTest {
 
     /**
      * Tries to clear all data from the User table
-     * @throws Exception Problem with the code used to test the retrieval
+     * @throws DatabaseException Problem with the code used to test the retrieval
      */
     @Test
-    public void clearPass() throws Exception {
+    public void clearPass() throws DatabaseException {
         try {
             setGenericUser();
             insertGenericUser();
@@ -199,7 +199,7 @@ public class UserDaoTest {
                 "firstName", "lastName", "m", "personID");
     }
 
-    public void insertGenericUser() throws Exception {
+    public void insertGenericUser() throws DatabaseException {
         setGenericUser();
         userDao.insertUser(genericUser);
         db.commitConnection(true);

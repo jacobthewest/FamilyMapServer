@@ -1,5 +1,8 @@
 package Service;
 
+import DataAccess.Database;
+import DataAccess.DatabaseException;
+import Result.ApiResult;
 import Result.ClearResult;
 
 /**
@@ -12,6 +15,13 @@ public class ClearService {
      * @return the result of clearing the request
      */
     public static ClearResult clear() {
-        return null;
+        try {
+            Database db = new Database();
+            db.emptyTables();
+            db.commitConnection(true);
+        } catch(DatabaseException e) {
+            return new ClearResult();
+        }
+        return new ClearResult();
     }
 }
