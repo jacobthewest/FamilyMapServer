@@ -1,11 +1,15 @@
 package Result;
 
+import DataAccess.PersonDao;
+import Model.AuthToken;
+import Model.Person;
+
 /**
  * Class to represent the results of a request to the
  * <code>/load</code> API route
  */
 public class LoginResult extends ApiResult {
-    private String authToken;
+    private String token;
     private String userName;
     private String personID;
 
@@ -19,13 +23,19 @@ public class LoginResult extends ApiResult {
 
     /**
      * Creates an ApiResult of a failed request to the <code>/user/login</code> route.
+     * @param token String token from LoginRequest
+     * @param userName String userName from LoginRequest
+     * @param personID String personID from LoginRequest
      */
-    public LoginResult() {
+    public LoginResult(String token, String userName, String personID) {
         super(true, null);
+        setToken(token);
+        setUserName(userName);
+        setPersonID(personID);
     }
 
-    public String getAuthToken() {
-        return authToken;
+    public String getToken() {
+        return token;
     }
 
     public String getUserName() {
@@ -36,8 +46,8 @@ public class LoginResult extends ApiResult {
         return personID;
     }
 
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public void setUserName(String userName) {

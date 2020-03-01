@@ -4,7 +4,7 @@ package Result;
  * Class to represent the results of a request to the API route <code>/user/register</code>
  */
 public class RegisterResult extends ApiResult {
-    private String authToken;
+    private String token;
     private String userName;
     private String personID;
 
@@ -17,14 +17,20 @@ public class RegisterResult extends ApiResult {
     }
 
     /**
-     * Creates an ApiResult of a failed request to the <code>/user/register</code> route.
+     * Creates an ApiResult of a successful request to the <code>/user/register</code> route.
+     * @param token String token from Register Request
+     * @param userName String userName from Register Request
+     * @param personID String personID from Register Request
      */
-    public RegisterResult() {
+    public RegisterResult(String token, String userName, String personID) {
         super(true, null);
+        setToken(token);
+        setUserName(userName);
+        setPersonID(personID);
     }
 
-    public String getAuthToken() {
-        return authToken;
+    public String getToken() {
+        return token;
     }
 
     public String getUserName() {
@@ -35,8 +41,8 @@ public class RegisterResult extends ApiResult {
         return personID;
     }
 
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public void setUserName(String userName) {
