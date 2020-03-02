@@ -41,8 +41,8 @@ public class FillService {
      * optional "generations" parameter lets the caller specify the number of generations of ancestors
      * to be generated, and must be a non-negative integer (the default is 4, which results in 31 new
      * persons each with associated events).
-     * @param userName the userName of User to fill
-     * @param generations the number of generations to generate
+     * @param userName The userName of User to fill.
+     * @param generations The number of generations to generate.
      * @return The FillResult from attempting to fill the database.
      */
     public FillResult fill(String userName, int generations) {
@@ -123,7 +123,7 @@ public class FillService {
      */
     public FillResult fill(String userName) {
         final int DEFAULT_GENERATIONS = 4;
-        return null;
+        return fill(userName, DEFAULT_GENERATIONS);
     }
 
     /**

@@ -1,5 +1,10 @@
 package service;
 
+import dataAccess.*;
+import model.Event;
+import model.Person;
+import model.User;
+import result.ApiResult;
 import result.LoadResult;
 import request.LoadRequest;
 
@@ -15,6 +20,57 @@ public class LoadService {
      * @return The result of loading.
      */
     public static LoadResult load(LoadRequest request) {
-        return null;
+        if(request.getUsers() == null) {
+            return new LoadResult(ApiResult.INVALID_REQUEST_DATA + " Users array is null");
+        }
+        if(request.getPersons() == null) {
+            return new LoadResult(ApiResult.INVALID_REQUEST_DATA + " Persons array is null");
+        }
+        if(request.getEvents() == null) {
+            return new LoadResult(ApiResult.INVALID_REQUEST_DATA + " Events array is null");
+        }
+
+        try {
+            // Open the Database and establish a connection
+            Database db = new Database();
+            db.loadDriver();
+            db.openConnection();
+
+            // Retrieve data from request
+            Event[] events = request.getEvents();
+            Person[] persons = request.getPersons();
+            User[] users = request.getUsers();
+
+            // Open access to the Database tables
+            EventDao eventDao = new EventDao();
+            PersonDao personDao = new PersonDao();
+            UserDao userDao = new UserDao();
+
+            // Clear all data from user person and event tables
+            db.emptyTables();
+            db.commitConnection(true);
+
+            // Make sure the clear worked
+            if(eventDao.getCountOfAllEvents() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR + " " +
+                    "Event table is not empty");}
+            if(personDao.getCountOfAllPersons() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR + " " +
+                    "Person table is not empty");}
+            if(userDao.getCountOfAllUsers() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR +" " +
+                        "User table is not empty");}
+
+            // Then insert all of the data
+            for(Event singleEvent: events) {eventDao.insertEvent(singleEvent);}
+            for(Person singlePerson: persons) {personDao.insertPerson(singlePerson);}
+            for(User singleUser: users) {userDao.insertUser(singleUser);}
+
+            // Get the number of added objects
+            int numEventsAdded = eventDao.getCountOfAllEvents();
+            int numPersonsAdded = personDao.getCountOfAllPersons();
+            int numUsersAdded = userDao.getCountOfAllUsers();
+
+            return new LoadResult(numUsersAdded, numPersonsAdded, numEventsAdded);
+        } catch(DatabaseException e) {
+            return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR + " " + e.getMessage());
+        }
     }
 }

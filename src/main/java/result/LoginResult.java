@@ -18,7 +18,7 @@ public class LoginResult extends ApiResult {
     }
 
     /**
-     * Creates an ApiResult of a failed request to the <code>/user/login</code> route.
+     * Creates an ApiResult of a successful request to the <code>/user/login</code> route.
      * @param token String token from LoginRequest
      * @param userName String userName from LoginRequest
      * @param personID String personID from LoginRequest
