@@ -17,10 +17,14 @@ public class ClearService {
     public static ClearResult clear() {
         try {
             Database db = new Database();
+            db.loadDriver();
+            db.openConnection();
             db.emptyTables();
             db.commitConnection(true);
+            db.closeConnection();
         } catch(DatabaseException e) {
-            return new ClearResult();
+            return new ClearResult(ApiResult.INTERNAL_SERVER_ERROR
+             + ": " + e.getMessage() + " Failure to clear database.");
         }
         return new ClearResult();
     }

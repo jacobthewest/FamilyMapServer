@@ -216,6 +216,36 @@ public class EventDao {
         }
     }
 
+    public Event[] getAllEvents() throws DatabaseException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int numberOfEvents = getCountOfAllEvents();
+        Event[] data = new Event[numberOfEvents];
+
+        try {
+            stmt = connection.prepareStatement("SELECT * FROM Event");
+            rs = stmt.executeQuery();
+            int arrayCounter = 0;
+
+            while(rs.next()) {
+                Event tempEvent = new Event(rs.getString(1), rs.getString(2));
+                tempEvent.setPersonID(rs.getString(3));
+                tempEvent.setLatitude(rs.getDouble(4));
+                tempEvent.setLongitude(rs.getDouble(5));
+                tempEvent.setCountry(rs.getString(6));
+                tempEvent.setCity(rs.getString(7));
+                tempEvent.setEventType(rs.getString(8));
+                tempEvent.setYear(rs.getInt(9));
+
+                data[arrayCounter] = tempEvent;
+                arrayCounter++;
+            }
+        } catch (Exception e) {
+            throw new DatabaseException("SQLException when selecting all Events: " + e);
+        }
+        return data;
+    }
+
     /**
      * Returns an Event from the database if it exist in it
      * @param eventID String identifier unique to the Event object to retrieve

@@ -11,7 +11,7 @@ public class ApiResult {
             "Request property missing or has invalid value";
     public static final String USERNAME_TAKEN = "" +
             "Username already taken by another user";
-    public static final String INTERNAL_SERVICE_ERROR = "" +
+    public static final String INTERNAL_SERVER_ERROR = "" +
             "Internal server error";
     public static final String INVALID_FILL_PARAM = "" +
             "Invalid username or generations parameter";
