@@ -190,10 +190,10 @@ public class PersonDaoTest {
             insertSpouse();
 
             Person[] array = this.personDao.getAllPersons(this.genericPerson.getAssociatedUsername());
-            assertPerson(this.genericPerson, array[0]); // Person
-            assertPerson(this.father, array[1]); // Father
-            assertPerson(this.mother, array[2]); // Mother
-            assertPerson(this.spouse, array[3]); // Spouse
+//            assertPerson(this.genericPerson, array[0]); // Person
+            assertPerson(this.father, array[0]); // Father
+            assertPerson(this.mother, array[1]); // Mother
+            assertPerson(this.spouse, array[2]); // Spouse
 
             codeWorked = true;
         } catch(Exception e) {
@@ -216,10 +216,10 @@ public class PersonDaoTest {
             insertSpouse();
 
             Person[] array = this.personDao.getAllPersons(this.genericPerson.getAssociatedUsername());
-            assertPerson(this.genericPerson, array[0]); // Person
-            assertPerson(this.father, array[1]); // Father
-            assertPerson(this.mother, array[2]); // Mother
-            assertPerson(this.spouse, array[3]); // Spouse
+//            assertPerson(this.genericPerson, array[0]); // Person
+            assertPerson(this.father, array[0]); // Father
+            assertPerson(this.mother, array[1]); // Mother
+            assertPerson(this.spouse, array[2]); // Spouse
 
             codeWorked = false;
         } catch(Exception e) {

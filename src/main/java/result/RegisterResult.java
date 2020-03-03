@@ -11,9 +11,10 @@ public class RegisterResult extends ApiResult {
     /**
      * Creates an ApiResult of a failed request to the <code>/user/register</code> route.
      * @param error the error message
+     * @param description Description of the error message
      */
-    public RegisterResult(String error) {
-        super(false, error);
+    public RegisterResult(String error, String description) {
+        super(false, error, description);
     }
 
     /**
@@ -23,7 +24,7 @@ public class RegisterResult extends ApiResult {
      * @param personID String personID from Register Request
      */
     public RegisterResult(String token, String userName, String personID) {
-        super(true, null);
+        super(true, null, null);
         setToken(token);
         setUserName(userName);
         setPersonID(personID);

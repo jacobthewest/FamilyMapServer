@@ -20,16 +20,17 @@ public class PersonResult extends ApiResult {
      * Creates an ApiResult of a failed request to the <code>/person/[personID]</code> and
      * <code>/person</code> routes.
      * @param error the error message
+     * @param description Explanation of the error message
      */
-    public PersonResult(String error) {
-        super(false, error);
+    public PersonResult(String error, String description) {
+        super(false, error, description);
     }
 
     /**
      * Creates an ApiResult of a successful request to the <code>/person</code> route.
      */
     public PersonResult(Person[] data) {
-        super(true, null);
+        super(true, null, null);
         setData(data);
     }
 
@@ -37,7 +38,7 @@ public class PersonResult extends ApiResult {
      * Creates an ApiResult of a successful request to the <code>/person</code> route.
      */
     public PersonResult(Person person) {
-        super(true, null);
+        super(true, null, null);
         setAssociatedUsername(person.getAssociatedUsername());
         setPersonID(person.getPersonID());
         setFirstName(person.getFirstName());

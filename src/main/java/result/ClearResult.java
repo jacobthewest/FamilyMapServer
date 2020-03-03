@@ -12,16 +12,17 @@ public class ClearResult extends ApiResult {
 
     /**
      * Creates an ApiResult of a failed request to the <code>/clear</code> route.
-     * @param error the error message
+     * @param error The error message
+     * @param description Description of the error message
      */
-    public ClearResult(String error) {
-        super(false, error);
+    public ClearResult(String error, String description) {
+        super(false, error, description);
     }
 
     /**
      * Creates an ApiResult of a successful request to the <code>/clear</code> route.
      */
     public ClearResult() {
-        super(true, MESSAGE);
+        super(true, MESSAGE, null);
     }
 }

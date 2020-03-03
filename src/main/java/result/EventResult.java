@@ -22,9 +22,10 @@ public class EventResult extends ApiResult {
      * Creates an ApiResult of a failed request to the <code>/event</code> and
      * <code>/event/[eventID]</code> routes.
      * @param error The error message
+     * @param description Description of the error message
      */
-    public EventResult(String error) {
-        super(false, error);
+    public EventResult(String error, String description) {
+        super(false, error, description);
     }
 
     /**
@@ -33,7 +34,7 @@ public class EventResult extends ApiResult {
      * @param data An array of Event objects
      */
     public EventResult(Event[] data) {
-        super(true, null);
+        super(true, null, null);
         setData(data);
     }
 
@@ -43,7 +44,7 @@ public class EventResult extends ApiResult {
      * @param event An event object to be displayed in the response body
      */
     public EventResult(Event event) {
-        super(true, null);
+        super(true, null, null);
         setEvent(event);
     }
 

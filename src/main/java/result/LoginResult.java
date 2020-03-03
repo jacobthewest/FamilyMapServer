@@ -12,9 +12,9 @@ public class LoginResult extends ApiResult {
     /**
      * Creates an ApiResult of a failed request to the <code>/user/login</code> route.
      * @param error The error message for the failed login attempt
+     * @param description Description of the error message
      */
-    public LoginResult(String error) {
-        super(false, error);
+    public LoginResult(String error, String description) {super(false, error, description);
     }
 
     /**
@@ -24,7 +24,7 @@ public class LoginResult extends ApiResult {
      * @param personID String personID from LoginRequest
      */
     public LoginResult(String token, String userName, String personID) {
-        super(true, null);
+        super(true, null, null);
         setToken(token);
         setUserName(userName);
         setPersonID(personID);

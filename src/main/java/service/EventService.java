@@ -23,7 +23,7 @@ public class EventService {
      */
     public static EventResult getEvent(String eventID, AuthToken authToken) {
         if (eventID == null) {
-            return new EventResult(ApiResult.INVALID_EVENT_ID_PARAM + ": eventID is null");
+            return new EventResult(ApiResult.INVALID_EVENT_ID_PARAM,"eventID is null");
         }
         try {
             // Set up DB
@@ -32,7 +32,7 @@ public class EventService {
             db.openConnection();
 
             if(authToken.getUserName() == null) {
-                return new EventResult(ApiResult.INVALID_AUTH_TOKEN + " AuthToken userName is null");
+                return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
             }
 
             // Set up Daos and get Event
@@ -41,14 +41,15 @@ public class EventService {
 
             // userName in AuthToken MUST match associatedUsername in Event
             if(returnedEvent.getAssociatedUsername() != authToken.getUserName()) {
-                return new EventResult(ApiResult.REQUESTED_EVENT_NO_RELATION + "AuthToken userName: " +
+                return new EventResult(ApiResult.REQUESTED_EVENT_NO_RELATION, "AuthToken userName: " +
                         authToken.getUserName() + " Event associatedUsername: " + returnedEvent.getAssociatedUsername());
             }
+
+            // Close db connection and return
             db.closeConnection();
             return new EventResult(returnedEvent);
         } catch(DatabaseException e) {
-            return new EventResult(ApiResult.INTERNAL_SERVER_ERROR
-                    + ": " + e.getMessage() + " Failure to retrieve Event by EventID.");
+            return new EventResult(ApiResult.INTERNAL_SERVER_ERROR, e.getMessage() + ". Failure to retrieve Event by EventID.");
         }
     }
 
@@ -68,7 +69,7 @@ public class EventService {
             db.openConnection();
 
             if(authToken.getUserName() == null) {
-                return new EventResult(ApiResult.INVALID_AUTH_TOKEN + " AuthToken userName is null");
+                return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
             }
 
             // Set up Daos and get Event
@@ -77,11 +78,12 @@ public class EventService {
             // Create eventDao thing where you get all Events
             Event[] allEvents = eventDao.getAllEvents();
 
+            // Close db connection and return
             db.closeConnection();
             return new EventResult(allEvents);
         } catch(DatabaseException e) {
-            return new EventResult(ApiResult.INTERNAL_SERVER_ERROR
-                    + ": " + e.getMessage() + " Failure to retrieve Event by EventID.");
+            return new EventResult(ApiResult.INTERNAL_SERVER_ERROR,
+                    e.getMessage() + " Failure to retrieve Event by EventID.");
         }
     }
 }

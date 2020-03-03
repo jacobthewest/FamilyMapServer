@@ -14,9 +14,10 @@ public class FillResult extends ApiResult {
      * Creates an ApiResult of a failed request to the <code>/fill</code> and
      * <code>/fill/{generations}]</code> routes.
      * @param error the error message
+     * @param description Description of the error message
      */
-    public FillResult(String error) {
-        super(false, error);
+    public FillResult(String error, String description) {
+        super(false, error, description);
     }
 
     /**
@@ -26,6 +27,6 @@ public class FillResult extends ApiResult {
      * @param numEventsAdded Int number of persons added from Fill Service
      */
     public FillResult(int numPersonsAdded, int numEventsAdded) {
-        super(true, String.format(MESSAGE, numPersonsAdded, numEventsAdded));
+        super(true, String.format(MESSAGE, numPersonsAdded, numEventsAdded), null);
     }
 }

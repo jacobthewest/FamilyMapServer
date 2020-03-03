@@ -9,9 +9,10 @@ public class LoadResult extends ApiResult {
     /**
      * Creates an ApiResult of a failed request to the <code>/load</code> route.
      * @param error the error message
+     * @param description Description of the error message
      */
-    public LoadResult(String error) {
-        super(false, error);
+    public LoadResult(String error, String description) {
+        super(false, error, description);
     }
 
     /**
@@ -21,6 +22,6 @@ public class LoadResult extends ApiResult {
      * @param numEventsAdded Int number of events added from load request
      */
     public LoadResult(int numUsersAdded, int numPersonsAdded, int numEventsAdded) {
-        super(true, String.format(MESSAGE, numUsersAdded, numPersonsAdded, numEventsAdded));
+        super(true, String.format(MESSAGE, numUsersAdded, numPersonsAdded, numEventsAdded), null);
     }
 }

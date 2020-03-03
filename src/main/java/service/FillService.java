@@ -1,7 +1,5 @@
 package service;
 
-import com.sun.org.apache.bcel.internal.generic.RETURN;
-import com.sun.org.apache.regexp.internal.RE;
 import dataAccess.*;
 import model.Event;
 import model.Person;
@@ -49,10 +47,10 @@ public class FillService {
         setUpDataForFill();
 
         if(userName == null) {
-            return new FillResult(ApiResult.INVALID_FILL_PARAM + "userName is null");
+            return new FillResult(ApiResult.INVALID_FILL_PARAM, "userName is null");
         }
         if(generations < 0) {
-            return new FillResult(ApiResult.INVALID_FILL_PARAM + " Must request non-negative number of " +
+            return new FillResult(ApiResult.INVALID_FILL_PARAM, "Must request non-negative number of " +
                     "generations. Generations requested: " + generations);
         }
 
@@ -69,7 +67,7 @@ public class FillService {
             // The required "username" parameter must be a user already registered with the server
             Person preDeletePersonCopy = personDao.getPersonByAssociatedUsername(userName);
             if(preDeletePersonCopy == null) {
-                return new FillResult(ApiResult.INVALID_FILL_PARAM + " userName does not exist within the server");
+                return new FillResult(ApiResult.INVALID_FILL_PARAM, "userName does not exist within the server");
             }
 
             // If there is any data in the database already associated with the given user name, it is deleted.
@@ -104,9 +102,12 @@ public class FillService {
             for(Person singlePerson: this.generatedPersons) {
                 personDao.insertPerson(singlePerson);
             }
+
+            // Close db connection and return
+            db.closeConnection();
             return new FillResult(this.generatedPersons.size(), this.generatedEvents.size());
         } catch(DatabaseException e) {
-            return new FillResult(ApiResult.INTERNAL_SERVER_ERROR + " Error filling with " +
+            return new FillResult(ApiResult.INTERNAL_SERVER_ERROR, "Error filling with " +
                     userName + " " + generations);
         }
     }

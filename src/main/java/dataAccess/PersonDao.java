@@ -285,7 +285,8 @@ public class PersonDao {
                     spouse = getPersonByPersonID(self.getSpouseId());
                 }
             }
-            Person[] returnArray = {self, father, mother, spouse};
+//            Person[] returnArray = {self, father, mother, spouse};
+            Person[] returnArray = {father, mother, spouse};
             return returnArray;
         } catch(Exception e) {
             return null;

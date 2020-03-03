@@ -21,11 +21,12 @@ public class ClearService {
             db.openConnection();
             db.emptyTables();
             db.commitConnection(true);
+
+            // Close db connection and return
             db.closeConnection();
+            return new ClearResult();
         } catch(DatabaseException e) {
-            return new ClearResult(ApiResult.INTERNAL_SERVER_ERROR
-             + ": " + e.getMessage() + " Failure to clear database.");
+            return new ClearResult(ApiResult.INTERNAL_SERVER_ERROR,e.getMessage() + " Failure to clear database.");
         }
-        return new ClearResult();
     }
 }

@@ -5,6 +5,7 @@ package result;
  */
 public class ApiResult {
     private String message;
+    private String description;
     private boolean success;
 
     public static final String REQUEST_PROPERTY_MISSING_OR_INVALID = "" +
@@ -31,12 +32,14 @@ public class ApiResult {
     /**
      * Creates a new API result
      *
-     * @param success If the ApiRequest was successful in returning data
-     * @param message A description of why the ApiRequest failed
+     * @param success If the ApiRequest was successful in returning data.
+     * @param message A generic label of why the ApiRequest failed.
+     * @param description A specific description of why the ApiRequest failed.
      */
-    public ApiResult(boolean success, String message) {
+    public ApiResult(boolean success, String message, String description) {
         setSuccessMessage(success);
         setFailMessage(message);
+        setDescription(description);
     }
 
     public String getFailMessage() {
@@ -47,6 +50,8 @@ public class ApiResult {
         return success;
     }
 
+    public String getDescription() {return description;}
+
     public void setSuccessMessage(boolean success) {
         this.success = success;
     }
@@ -54,4 +59,6 @@ public class ApiResult {
     public void setFailMessage(String message) {
         this.message = message;
     }
+
+    public void setDescription(String description) {this.description = description;}
 }

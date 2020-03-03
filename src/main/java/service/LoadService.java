@@ -21,13 +21,13 @@ public class LoadService {
      */
     public static LoadResult load(LoadRequest request) {
         if(request.getUsers() == null) {
-            return new LoadResult(ApiResult.INVALID_REQUEST_DATA + " Users array is null");
+            return new LoadResult(ApiResult.INVALID_REQUEST_DATA, "Users array is null");
         }
         if(request.getPersons() == null) {
-            return new LoadResult(ApiResult.INVALID_REQUEST_DATA + " Persons array is null");
+            return new LoadResult(ApiResult.INVALID_REQUEST_DATA, "Persons array is null");
         }
         if(request.getEvents() == null) {
-            return new LoadResult(ApiResult.INVALID_REQUEST_DATA + " Events array is null");
+            return new LoadResult(ApiResult.INVALID_REQUEST_DATA, "Events array is null");
         }
 
         try {
@@ -51,11 +51,11 @@ public class LoadService {
             db.commitConnection(true);
 
             // Make sure the clear worked
-            if(eventDao.getCountOfAllEvents() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR + " " +
+            if(eventDao.getCountOfAllEvents() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR,
                     "Event table is not empty");}
-            if(personDao.getCountOfAllPersons() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR + " " +
+            if(personDao.getCountOfAllPersons() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR,
                     "Person table is not empty");}
-            if(userDao.getCountOfAllUsers() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR +" " +
+            if(userDao.getCountOfAllUsers() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR,
                         "User table is not empty");}
 
             // Then insert all of the data
@@ -68,9 +68,11 @@ public class LoadService {
             int numPersonsAdded = personDao.getCountOfAllPersons();
             int numUsersAdded = userDao.getCountOfAllUsers();
 
+            // Close db connection and return
+            db.closeConnection();
             return new LoadResult(numUsersAdded, numPersonsAdded, numEventsAdded);
         } catch(DatabaseException e) {
-            return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR + " " + e.getMessage());
+            return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }
