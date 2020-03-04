@@ -37,28 +37,28 @@ public class ApiResult {
      * @param description A specific description of why the ApiRequest failed.
      */
     public ApiResult(boolean success, String message, String description) {
-        setSuccessMessage(success);
-        setFailMessage(message);
+        setSuccess(success);
+        setMessage(message);
         setDescription(description);
-    }
-
-    public String getFailMessage() {
-        return message;
     }
 
     public boolean getSuccess() {
         return success;
     }
 
-    public String getDescription() {return description;}
-
-    public void setSuccessMessage(boolean success) {
-        this.success = success;
+    public String getMessage() {
+        return message;
     }
 
-    public void setFailMessage(String message) {
+    public String getDescription() {return description;}
+
+    public void setMessage(String message) {
         this.message = message;
     }
 
     public void setDescription(String description) {this.description = description;}
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
 }

@@ -22,7 +22,7 @@ public class RegisterService {
      * @param request A RegisterService object containing data needed to serve the API call
      * @return The result of registering the user
      */
-     public static RegisterResult register(RegisterRequest request) {
+     public RegisterResult register(RegisterRequest request) {
          // Error check the parameter
          if(request == null) {
              return new RegisterResult(ApiResult.REQUEST_PROPERTY_MISSING_OR_INVALID, "RegisterRequest is null");
@@ -49,9 +49,6 @@ public class RegisterService {
              User userFromRequest = request.getUser();
              User retrievedUser = userDao.getUserByUserName(userFromRequest.getUserName());
 
-             // Close db
-             db.closeConnection();
-
              if(retrievedUser == null) {
                  // A user by that userName DOES NOT exist in database and may be added.
 
@@ -71,10 +68,12 @@ public class RegisterService {
                     LoginService loginService = new LoginService();
                     loginService.login(loginRequest);
 
-                 // 4) Returns an auth token.
+                 // 4) Close db and return an auth token.
+                    db.closeConnection();
                     return new RegisterResult(authToken.getToken(), authToken.getUserName(), userFromRequest.getPersonID());
              } else {
                  // That userName has been taken. User may not be added by that userName.
+                 db.closeConnection();
                  return new RegisterResult(ApiResult.USERNAME_TAKEN,
                          "userName: " + userFromRequest.getUserName() + " is already taken.");
              }

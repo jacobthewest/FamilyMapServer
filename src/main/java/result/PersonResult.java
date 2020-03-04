@@ -49,6 +49,11 @@ public class PersonResult extends ApiResult {
         setSpouseID(person.getSpouseId());
     }
 
+    public Person getPerson() {
+        return new Person(personID, associatedUsername, firstName, lastName,
+                gender, fatherID, motherID, spouseID);
+    }
+
     public Person[] getData() {
         return data;
     }

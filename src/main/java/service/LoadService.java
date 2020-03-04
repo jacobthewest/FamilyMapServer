@@ -19,7 +19,7 @@ public class LoadService {
      *                a Person array, and an Events array
      * @return The result of loading.
      */
-    public static LoadResult load(LoadRequest request) {
+    public LoadResult load(LoadRequest request) {
         if(request.getUsers() == null) {
             return new LoadResult(ApiResult.INVALID_REQUEST_DATA, "Users array is null");
         }

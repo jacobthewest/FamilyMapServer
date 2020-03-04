@@ -12,6 +12,7 @@ public class RegisterRequest {
     private String firstName;
     private String lastName;
     private String gender;
+    private String personID;
 
     /**
      * Creates a LoginRequest for the <code>/user/register</code> route
@@ -23,20 +24,22 @@ public class RegisterRequest {
     }
 
     public void setUser(User user) {
-        this.userName = user.getFirstName();
+        this.userName = user.getUserName();
         this.password = user.getPassWord();
         this.email = user.getEmail();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.gender = user.getGender();
+        this.personID = user.getPersonID();
     }
 
     public User getUser() {
         User returnUser = new User(this.userName, this.password);
         returnUser.setEmail(this.email);
         returnUser.setFirstName(this.firstName);
-        returnUser.setFirstName(this.lastName);
-        returnUser.setFirstName(this.gender);
+        returnUser.setLastName(this.lastName);
+        returnUser.setGender(this.gender);
+        returnUser.setPersonID(this.personID);
 
         return returnUser;
     }

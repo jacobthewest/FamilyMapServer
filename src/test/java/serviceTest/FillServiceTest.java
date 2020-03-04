@@ -109,7 +109,7 @@ public class FillServiceTest {
     public void twoParamFillFail() {
         FillResult fillResult = fillService.fill(VALID_USERNAME, -3);
 
-        assertEquals(ApiResult.INVALID_FILL_PARAM, fillResult.getFailMessage());
+        assertEquals(ApiResult.INVALID_FILL_PARAM, fillResult.getMessage());
         assertFalse(fillResult.getSuccess());
     }
 
@@ -142,7 +142,7 @@ public class FillServiceTest {
     public void oneParamFillFail() {
         FillResult fillResult = fillService.fill("badUserName");
 
-        assertEquals(ApiResult.INVALID_FILL_PARAM, fillResult.getFailMessage());
+        assertEquals(ApiResult.INVALID_FILL_PARAM, fillResult.getMessage());
         assertFalse(fillResult.getSuccess());
     }
 

@@ -20,7 +20,7 @@ public class LoginService {
      * @param request An instance of LoginRequest with userName and password to login
      * @return An AuthToken needed to maintain the User's login status
      */
-    public static LoginResult login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) {
         // Error check the loginRequest
         if(request.getPassword() == null) {
             return new LoginResult(ApiResult.REQUEST_PROPERTY_MISSING_OR_INVALID,
@@ -53,7 +53,7 @@ public class LoginService {
             }
 
             // Verify if the User's password from the database matches the password from the request
-            if(userToVerify.getPassWord() != password) {
+            if(!userToVerify.getPassWord().equals(password)) {
                 db.closeConnection();
                 return new LoginResult(ApiResult.INTERNAL_SERVER_ERROR,
                         "Provided password does not match password found in database.");

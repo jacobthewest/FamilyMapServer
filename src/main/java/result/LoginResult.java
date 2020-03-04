@@ -14,8 +14,7 @@ public class LoginResult extends ApiResult {
      * @param error The error message for the failed login attempt
      * @param description Description of the error message
      */
-    public LoginResult(String error, String description) {super(false, error, description);
-    }
+    public LoginResult(String error, String description) {super(false, error, description);}
 
     /**
      * Creates an ApiResult of a successful request to the <code>/user/login</code> route.
