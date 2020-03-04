@@ -8,6 +8,7 @@ import model.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import result.ApiResult;
 import result.FillResult;
 import service.FillService;
 
@@ -89,9 +90,16 @@ public class FillServiceTest {
         // Generations we will use to test: 2, to keep it simple
         FillResult fillResult = fillService.fill(VALID_USERNAME, GENERATIONS_FOR_TEST);
 
+        double numPeopleSupposedToBeAdded = Math.pow(2, (GENERATIONS_FOR_TEST + 1)) - 1; // Algorithm for calculating number of nodes in ancestry tree
+        int numPeopleAdded = 0;
+        try {
+            numPeopleAdded = personDao.getCountOfAllPersons();
+        } catch(DatabaseException ex) {
+            System.out.println("Problem with personDao.getCountOfAllPersons() in twoParamFillPas(): " + ex.getMessage());
+        }
+
         assertTrue(fillResult.getSuccess());
-        // Use GENERATIONS_FOR_TEST to calculate the number of users, persons, and events that should have been added
-        // Try to find the numbers in the string. You could substring the response to get the numbers.
+        assertEquals(numPeopleSupposedToBeAdded, numPeopleAdded);
     }
 
     /**
@@ -100,6 +108,9 @@ public class FillServiceTest {
     @Test
     public void twoParamFillFail() {
         FillResult fillResult = fillService.fill(VALID_USERNAME, -3);
+
+        assertEquals(ApiResult.INVALID_FILL_PARAM, fillResult.getFailMessage());
+        assertFalse(fillResult.getSuccess());
     }
 
     /**
@@ -108,7 +119,20 @@ public class FillServiceTest {
     @Test
     public void oneParamFillPass() {
         // Valid userName: "userName"  // Valid because of the inserts we did earlier.
-        FillResult fillResult = fillService.fill("userName");
+        FillResult fillResult = fillService.fill(VALID_USERNAME);
+
+        // Correct number of people to be added with 4 generations = 31 people.
+        int numPeopleSupposedToBeAdded = 31;
+        int numPeopleAdded = 0;
+
+        try {
+            numPeopleAdded = personDao.getCountOfAllPersons();
+        } catch(DatabaseException ex) {
+            System.out.println("Problem with personDao.getCountOfAllPersons() in oneParamFillPass(): " + ex.getMessage());
+        }
+
+        assertTrue(fillResult.getSuccess());
+        assertEquals(numPeopleSupposedToBeAdded, numPeopleAdded);
     }
 
     /**
@@ -117,6 +141,9 @@ public class FillServiceTest {
     @Test
     public void oneParamFillFail() {
         FillResult fillResult = fillService.fill("badUserName");
+
+        assertEquals(ApiResult.INVALID_FILL_PARAM, fillResult.getFailMessage());
+        assertFalse(fillResult.getSuccess());
     }
 
     private void createAndInsertStarterObjects() {

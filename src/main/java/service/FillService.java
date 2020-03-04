@@ -22,8 +22,6 @@ public class FillService {
     private List<Double> LONGITUDES = new ArrayList<Double>();
     private List<Event> generatedEvents = new ArrayList<Event>();
     private List<Person> generatedPersons = new ArrayList<Person>();
-    private int numPersonsGenerated;
-    private int numEventsGenerated;
     private final int MIN_PARENT_CHILD_AGE_DIFFERENCE = 13;
     private final int MAX_BIRTHING_AGE = 50;
     private final int MAX_DEATH_AGE = 120;
@@ -210,8 +208,6 @@ public class FillService {
         setCountries();
         setLatitudes();
         setLongitudes();
-        this.numPersonsGenerated = 0;
-        this.numEventsGenerated = 0;
     }
 
     /**
@@ -275,8 +271,8 @@ public class FillService {
 
         // Create mom and dads birthdays, deathdays, and baptisms
         // Get their birth years for the recursive call
-        int dadBirthYear = generateAndAddParentLifeEvents(dad, dadMarriage.getYear());
-        int momBirthYear = generateAndAddParentLifeEvents(mom, momMarriage.getYear());
+        int dadBirthYear = generateAndAddParentLifeEvents(dad, dadMarriage.getYear(), childBirthYear);
+        int momBirthYear = generateAndAddParentLifeEvents(mom, momMarriage.getYear(), childBirthYear);
 
         int parentsMarriageYear = dadMarriage.getYear();
 
@@ -318,10 +314,11 @@ public class FillService {
      * @param marriageYear The year the parent was married
      * @return The parent's birth year
      */
-    private int generateAndAddParentLifeEvents(Person parent, int marriageYear) {
-        // We are assuming people will get married between 18 and 24 years of age
-        // So we get their birthYear by saying they are 18 + (0 to 6) years old when they were married.
-        int birthYear = marriageYear - (ADULT_AGE + random.nextInt(7));
+    private int generateAndAddParentLifeEvents(Person parent, int marriageYear, int childBirthYear) {
+        int birthYear = getParentBirthYear(marriageYear, childBirthYear);
+
+
+
         int baptismYear = birthYear + 8; // They ALL are members of the church haha
 
         Event birth = createEvent("Birth", birthYear, parent);
@@ -389,9 +386,9 @@ public class FillService {
     }
 
     private void createDaosAndSetConnections() {
-        EventDao eventDao = new EventDao();
-        PersonDao personDao = new PersonDao();
-        UserDao userDao = new UserDao();
+        eventDao = new EventDao();
+        personDao = new PersonDao();
+        userDao = new UserDao();
 
         eventDao.setConnection(db.getConnection());
         personDao.setConnection(db.getConnection());
@@ -434,8 +431,19 @@ public class FillService {
     }
 
     private Person createRootPerson(Person preDeletePersonCopy) {
+
+        String gender;
+
+        // Randomly get person's gender
+        int result = random.nextInt(2);
+        if(result == 0){
+            gender = "m";
+        } else{
+            gender = "f";
+        }
+
         return createPersonObject(preDeletePersonCopy.getPersonID(),
-                preDeletePersonCopy.getGender(), preDeletePersonCopy.getLastName(), true);
+                gender, preDeletePersonCopy.getLastName(), true);
     }
 
     private FillResult errorCheckParameters(String userName, int generations) {
@@ -468,5 +476,27 @@ public class FillService {
             System.out.println("Problem in finishFill() function in FillService class: " + ex.getMessage());
         }
         return null;
+    }
+
+    private int getParentBirthYear(int marriageYear, int childBirthYear) {
+        boolean getNewParentBirthYear = true;
+        int parentBirthYear = 0;
+
+        // Make parent 13 years older than child
+        while(getNewParentBirthYear) {
+
+            // We are assuming people will get married between 18 and 24 years of age
+            // So we get their birthYear by saying they are 18 + (0 to 6) years old when they were married.
+            parentBirthYear = marriageYear - (ADULT_AGE + random.nextInt(7)); // Get's a random ma
+
+            // Check if parent-child age difference is ok
+            int parentChildAgeDifference = parentBirthYear - childBirthYear;
+            if(parentChildAgeDifference >= MIN_PARENT_CHILD_AGE_DIFFERENCE) getNewParentBirthYear = false;
+
+            // Check if maximum birthing age for parent is ok
+            int parentAgeAtChildBirth = (childBirthYear - parentBirthYear);
+            if(parentAgeAtChildBirth <= MAX_BIRTHING_AGE) getNewParentBirthYear = false;
+        }
+        return parentBirthYear;
     }
 }
