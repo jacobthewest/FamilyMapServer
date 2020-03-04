@@ -42,6 +42,8 @@ public class LoginResult extends ApiResult {
         return personID;
     }
 
+    public boolean getSuccess() {return super.getSuccess();}
+
     public void setToken(String token) {
         this.token = token;
     }

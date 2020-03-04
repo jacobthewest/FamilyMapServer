@@ -126,7 +126,9 @@ public class AuthTokenDao {
             }
 
             stmt = connection.prepareStatement(EMPTY_SQL);
-            stmt.executeUpdate();
+            if (stmt.executeUpdate() != 1) {
+                throw new DatabaseException("Error with emptying AuthToken table");
+            }
             stmt.close();
         }
         catch (Exception e) {

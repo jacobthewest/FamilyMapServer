@@ -42,10 +42,12 @@ public class RegisterService {
              UserDao userDao = new UserDao();
              AuthTokenDao authTokenDao = new AuthTokenDao();
 
+             userDao.setConnection(db.getConnection());
+             authTokenDao.setConnection(db.getConnection());
+
              // Retrieve data
              User userFromRequest = request.getUser();
              User retrievedUser = userDao.getUserByUserName(userFromRequest.getUserName());
-
 
              // Close db
              db.closeConnection();
@@ -76,7 +78,6 @@ public class RegisterService {
                  return new RegisterResult(ApiResult.USERNAME_TAKEN,
                          "userName: " + userFromRequest.getUserName() + " is already taken.");
              }
-
          } catch(DatabaseException e) {
              return new RegisterResult(ApiResult.INTERNAL_SERVER_ERROR, e.getMessage());
          }

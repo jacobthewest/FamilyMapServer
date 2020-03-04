@@ -21,7 +21,7 @@ public class EventService {
      * @param authToken The authToken needed to obtain the event
      * @return The eventResult containing an error message or an Event object
      */
-    public static EventResult getEvent(String eventID, AuthToken authToken) {
+    public EventResult getEvent(String eventID, AuthToken authToken) {
         if (eventID == null) {
             return new EventResult(ApiResult.INVALID_EVENT_ID_PARAM,"eventID is null");
         }
@@ -32,15 +32,18 @@ public class EventService {
             db.openConnection();
 
             if(authToken.getUserName() == null) {
+                db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
             }
 
             // Set up Daos and get Event
             EventDao eventDao = new EventDao();
+            eventDao.setConnection(db.getConnection());
             Event returnedEvent = eventDao.getEventByEventID(eventID);
 
             // userName in AuthToken MUST match associatedUsername in Event
-            if(returnedEvent.getAssociatedUsername() != authToken.getUserName()) {
+            if(!returnedEvent.getAssociatedUsername().equals(authToken.getUserName())) {
+                db.closeConnection();
                 return new EventResult(ApiResult.REQUESTED_EVENT_NO_RELATION, "AuthToken userName: " +
                         authToken.getUserName() + " Event associatedUsername: " + returnedEvent.getAssociatedUsername());
             }
@@ -61,7 +64,7 @@ public class EventService {
      * @return Returns ALL events for ALL family members of the current user. The current
      * user is determined from the provided auth token
      */
-    public static EventResult getAllEvents(AuthToken authToken) {
+    public EventResult getAllEvents(AuthToken authToken) {
         try {
             // Set up DB
             Database db = new Database();
@@ -69,11 +72,13 @@ public class EventService {
             db.openConnection();
 
             if(authToken.getUserName() == null) {
+                db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
             }
 
             // Set up Daos and get Event
             EventDao eventDao = new EventDao();
+            eventDao.setConnection(db.getConnection());
 
             // Create eventDao thing where you get all Events
             Event[] allEvents = eventDao.getAllEvents();

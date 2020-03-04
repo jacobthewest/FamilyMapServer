@@ -31,7 +31,6 @@ public class FillService {
     private static final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
     private Random random = new Random();
 
-
     /**
      * Populates the server's database with generated data for the specified user name.
      * The required "username" parameter must be a user already registered with the server. If there is
@@ -64,9 +63,14 @@ public class FillService {
             PersonDao personDao = new PersonDao();
             UserDao userDao = new UserDao();
 
+            eventDao.setConnection(db.getConnection());
+            personDao.setConnection(db.getConnection());
+            userDao.setConnection(db.getConnection());
+
             // The required "username" parameter must be a user already registered with the server
             Person preDeletePersonCopy = personDao.getPersonByAssociatedUsername(userName);
             if(preDeletePersonCopy == null) {
+                db.closeConnection();
                 return new FillResult(ApiResult.INVALID_FILL_PARAM, "userName does not exist within the server");
             }
 
@@ -76,7 +80,7 @@ public class FillService {
 
             // Make the user between 18 and 120 years old
             int birthYear = CURRENT_YEAR - random.nextInt((MAX_DEATH_AGE  + 1) - ADULT_AGE);
-            int currentUserMinDeathDate = CURRENT_YEAR + 1; // Make it so the user can't die upon program startup
+            //int currentUserMinDeathDate = CURRENT_YEAR + 1; // Make it so the user can't die upon program startup
 
             // Create the root person and add them
             Person rootPerson = createPersonObject(preDeletePersonCopy.getPersonID(),
@@ -91,7 +95,7 @@ public class FillService {
 
             // Let the recursion begin. After this function this.generatedEvents and this.generatedPersons
             // will be completely full.
-            generateAncestry(rootPerson, birthYear, currentUserMinDeathDate);
+            generateAncestry(rootPerson, birthYear, generations);
 
             // Insert created Events into database
             for(Event singleEvent: this.generatedEvents) {

@@ -37,11 +37,15 @@ public class PersonService {
             PersonDao personDao = new PersonDao();
             AuthTokenDao authTokenDao = new AuthTokenDao();
 
+            personDao.setConnection(db.getConnection());
+            authTokenDao.setConnection(db.getConnection());
+
             // Retrieve Person
             Person retrievedPerson = personDao.getPersonByPersonID(personID);
 
             // Error check the retrieved Person
             if(retrievedPerson == null) {
+                db.closeConnection();
                 return new PersonResult(ApiResult.INTERNAL_SERVER_ERROR,
                         "Retrieved Person is null and not found in the database");
             }
@@ -49,15 +53,18 @@ public class PersonService {
             String userNameToCheck = retrievedPerson.getAssociatedUsername();
             AuthToken authTokenToCheck = authTokenDao.getAuthTokenByUserName(userNameToCheck);
             if(authTokenToCheck.getToken() != authToken.getToken()) {
+                db.closeConnection();
                 return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
                         "AuthToken provided does not belong to the provided userName.");
             }
             if(!authTokenToCheck.getUserName().equals(retrievedPerson.getAssociatedUsername())) {
+                db.closeConnection();
                 return new PersonResult(ApiResult.REQUESTED_PERSON_NO_RELATION,
                         "userName associated with authToken does not match with the Person's userName");
             }
 
             // No errors so create successful PersonResult.
+            db.closeConnection();
             return new PersonResult(retrievedPerson);
 
         } catch(DatabaseException e) {
@@ -85,6 +92,7 @@ public class PersonService {
 
             // Create PersonDao
             PersonDao personDao = new PersonDao();
+            personDao.setConnection(db.getConnection());
 
             // Retrieve Person array from PersonDao
             Person[] personArray = personDao.getAllPersons(authToken.getUserName());

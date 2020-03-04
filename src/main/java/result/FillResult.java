@@ -29,4 +29,6 @@ public class FillResult extends ApiResult {
     public FillResult(int numPersonsAdded, int numEventsAdded) {
         super(true, String.format(MESSAGE, numPersonsAdded, numEventsAdded), null);
     }
+
+    public boolean getSuccess() {return super.getSuccess();}
 }

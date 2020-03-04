@@ -120,4 +120,6 @@ public class PersonResult extends ApiResult {
     public void setSpouseID(String spouseID) {
         this.spouseID = spouseID;
     }
+
+    public boolean getSuccess() {return super.getSuccess();}
 }

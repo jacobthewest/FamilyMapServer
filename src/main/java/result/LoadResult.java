@@ -24,4 +24,6 @@ public class LoadResult extends ApiResult {
     public LoadResult(int numUsersAdded, int numPersonsAdded, int numEventsAdded) {
         super(true, String.format(MESSAGE, numUsersAdded, numPersonsAdded, numEventsAdded), null);
     }
+
+    public boolean getSuccess() {return super.getSuccess();}
 }

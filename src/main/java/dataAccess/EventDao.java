@@ -238,9 +238,6 @@ public class EventDao {
                 throw new DatabaseException("Error with emptying Person table");
             }
             stmt.close();
-            stmt = connection.prepareStatement(EMPTY_SQL);
-            stmt.executeUpdate();
-            stmt.close();
         }
         catch (Exception e) {
             throw new DatabaseException("SQLException when emptying Event table: " + e);

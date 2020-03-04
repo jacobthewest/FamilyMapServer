@@ -10,8 +10,6 @@ import result.ApiResult;
 import result.LoginResult;
 import request.LoginRequest;
 
-import java.awt.*;
-
 /**
  * A class used to log a user into the server and serve the API route <code>user/login</code>.
  */
@@ -44,16 +42,19 @@ public class LoginService {
 
             // Create and open User a UserDao
             UserDao userDao = new UserDao();
+            userDao.setConnection(db.getConnection());
 
             // Get specified User from the database
             User userToVerify = userDao.getUserByUserName(userName);
             if(userToVerify == null) {
+                db.closeConnection();
                 return new LoginResult(ApiResult.INTERNAL_SERVER_ERROR,
                         "User to login was not found in the database.");
             }
 
             // Verify if the User's password from the database matches the password from the request
             if(userToVerify.getPassWord() != password) {
+                db.closeConnection();
                 return new LoginResult(ApiResult.INTERNAL_SERVER_ERROR,
                         "Provided password does not match password found in database.");
             } else {

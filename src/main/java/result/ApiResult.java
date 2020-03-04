@@ -46,7 +46,7 @@ public class ApiResult {
         return message;
     }
 
-    public boolean getSuccessMessage() {
+    public boolean getSuccess() {
         return success;
     }
 

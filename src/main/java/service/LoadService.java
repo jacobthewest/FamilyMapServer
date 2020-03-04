@@ -46,17 +46,24 @@ public class LoadService {
             PersonDao personDao = new PersonDao();
             UserDao userDao = new UserDao();
 
+            eventDao.setConnection(db.getConnection());
+            personDao.setConnection(db.getConnection());
+            userDao.setConnection(db.getConnection());
+
             // Clear all data from user person and event tables
             db.emptyTables();
             db.commitConnection(true);
 
             // Make sure the clear worked
-            if(eventDao.getCountOfAllEvents() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR,
-                    "Event table is not empty");}
-            if(personDao.getCountOfAllPersons() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR,
-                    "Person table is not empty");}
-            if(userDao.getCountOfAllUsers() != 0) {return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR,
-                        "User table is not empty");}
+            if(eventDao.getCountOfAllEvents() != 0) {
+                db.closeConnection();
+                return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR,"Event table is not empty");}
+            if(personDao.getCountOfAllPersons() != 0) {
+                db.closeConnection();
+                return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR,"Person table is not empty");}
+            if(userDao.getCountOfAllUsers() != 0) {
+                db.closeConnection();
+                return new LoadResult(ApiResult.INTERNAL_SERVER_ERROR,"User table is not empty");}
 
             // Then insert all of the data
             for(Event singleEvent: events) {eventDao.insertEvent(singleEvent);}

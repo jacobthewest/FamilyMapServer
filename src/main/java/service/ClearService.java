@@ -14,7 +14,7 @@ public class ClearService {
      * generated person, and event data.
      * @return the result of clearing the request
      */
-    public static ClearResult clear() {
+    public ClearResult clear() {
         try {
             Database db = new Database();
             db.loadDriver();

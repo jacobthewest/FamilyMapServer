@@ -25,4 +25,6 @@ public class ClearResult extends ApiResult {
     public ClearResult() {
         super(true, MESSAGE, null);
     }
+
+    public boolean getSuccess() {return super.getSuccess();}
 }

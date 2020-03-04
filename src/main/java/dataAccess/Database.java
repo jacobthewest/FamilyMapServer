@@ -116,7 +116,6 @@ public class Database {
      */
     public void emptyTables() throws DatabaseException {
         try {
-
             this.authTokenTable.empty();
             this.eventTable.empty();
             this.personTable.empty();
