@@ -99,14 +99,13 @@ public class LoginServiceTest {
     @Test
     public void loginFail() {
         setUser();
-        user.setPassWord("badPassWord");
         insertUser();
+        user.setPassWord("badPassWord");
+        insertAuthToken();
 
         LoginRequest loginRequest = new LoginRequest(user.getUserName(), user.getPassWord());
         loginService = new LoginService();
         LoginResult loginResult = loginService.login(loginRequest);
-
-        String token = getToken();
 
         assertFalse(loginResult.getSuccess());
         assertEquals(loginResult.getMessage(), ApiResult.REQUEST_PROPERTY_MISSING_OR_INVALID);

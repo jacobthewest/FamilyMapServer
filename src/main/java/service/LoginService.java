@@ -55,11 +55,12 @@ public class LoginService {
             // Verify if the User's password from the database matches the password from the request
             if(!userToVerify.getPassWord().equals(password)) {
                 db.closeConnection();
-                return new LoginResult(ApiResult.INTERNAL_SERVER_ERROR,
+                return new LoginResult(ApiResult.REQUEST_PROPERTY_MISSING_OR_INVALID,
                         "Provided password does not match password found in database.");
             } else {
                 // The passwords match! Now we need to retrieve the user's authToken
                 AuthTokenDao authTokenDao = new AuthTokenDao();
+                authTokenDao.setConnection(db.getConnection());
                 AuthToken authToken = authTokenDao.getAuthTokenByUserName(userName);
 
                 // Create successful login

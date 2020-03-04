@@ -78,13 +78,14 @@ public class EventDaoTest {
      * @throws DatabaseException Error encountered while performing the operation
      */
     @Test
-    public void insertNewEventWithPreviouslyUsedEventID() throws DatabaseException {
+    public void insertEventWithIdenticalEventIDAndPersonID() throws DatabaseException {
         boolean myCodeWorked;
         try {
             setEventObject();
             insertEventObject();
             String duplicateEventID = "eventID";
-            Event badEvent = new Event(duplicateEventID, "userNameBlah", "personIDBlah",
+            String duplicatePersonID = "personID";
+            Event badEvent = new Event(duplicateEventID, "userNameBlah", duplicatePersonID,
                     123.456, 789.10,"USA", "Boise", "rave", 1492);
             eventDao.insertEvent(badEvent);
             myCodeWorked = false;
