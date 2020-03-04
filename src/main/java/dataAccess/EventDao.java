@@ -22,8 +22,7 @@ public class EventDao {
             "country TEXT NOT NULL, " +
             "city TEXT NOT NULL, " +
             "eventType TEXT NOT NULL, " +
-            "year NUMERIC NOT NULL, " +
-            "PRIMARY KEY(eventID)" +
+            "year NUMERIC NOT NULL " +
             ")";
     private final String DROP_SQL = "DROP TABLE Event";
     private final String INSERT = "INSERT INTO Event " +
@@ -116,7 +115,10 @@ public class EventDao {
         try {
             Event tempEvent = getEventByEventID(event.getEventID());
             if(tempEvent != null) {
-                throw new DatabaseException("Event already exists with eventID: " + event.getEventID());
+                boolean problem = areIdenticalEvents(tempEvent, event);
+                if(problem) {
+                    throw new DatabaseException("Event already exists with eventID: " + event.getEventID());
+                }
             }
 
             stmt = connection.prepareStatement(INSERT);
@@ -138,6 +140,29 @@ public class EventDao {
         catch (Exception e) {
             throw new DatabaseException("SQLException when inserting Event object: " + e);
         }
+    }
+
+    /**
+     * Checks to see if two events are identical. Insertion is NOT allowed if
+     * the events have identical eventID's and personID's.
+     * @param tempEvent An event already in the database
+     * @param event An event to be inserted into the database
+     * @return
+     */
+    public boolean areIdenticalEvents(Event tempEvent, Event event) {
+        boolean equalEventIds = false;
+        boolean equalPersonIDs = false;
+
+        if(tempEvent.getEventID().equals(event.getEventID())) {
+            equalEventIds = true;
+        }
+
+        if(tempEvent.getPersonID().equals(event.getPersonID())) {
+            equalPersonIDs = true;
+        }
+
+        if(equalEventIds && equalPersonIDs) {return true;}
+        return false;
     }
 
     /**
@@ -206,8 +231,8 @@ public class EventDao {
         PreparedStatement stmt = null;
 
         try {
-            stmt = connection.prepareStatement("DELETE FROM Event" +
-                    "WHERE associatedUsername = ?;");
+            stmt = connection.prepareStatement("DELETE FROM Event " +
+                    "WHERE associatedUsername = ?");
             stmt.setString(1, associatedUsername);
             if (stmt.executeUpdate() < 1) {
                 if(getEventCountByAssociatedUsername(associatedUsername) > 0) {
@@ -235,7 +260,7 @@ public class EventDao {
 
             stmt = connection.prepareStatement(EMPTY_SQL);
             if (stmt.executeUpdate() != 1) {
-                throw new DatabaseException("Error with emptying Person table");
+                throw new DatabaseException("Error with emptying Event table");
             }
             stmt.close();
         }

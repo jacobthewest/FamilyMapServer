@@ -30,7 +30,7 @@ public class PersonDao {
             "(personID, associatedUsername, firstName, lastName, gender, " +
             "fatherID, motherID, spouseID) " +
             "VALUES (?,?,?,?,?,?,?,?);";
-    private final String DELETE_SQL = "DELETE FROM Person" +
+    private final String DELETE_SQL = "DELETE FROM Person " +
             "WHERE personID = ?;";
     private final String EMPTY_SQL = "DELETE FROM Person";
     private final String UPDATE_SQL = "UPDATE Person" +

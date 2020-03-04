@@ -1,5 +1,6 @@
 package service;
 
+import dataAccess.AuthTokenDao;
 import dataAccess.Database;
 import dataAccess.DatabaseException;
 import dataAccess.EventDao;
@@ -78,7 +79,28 @@ public class EventService {
 
             // Set up Daos and get Event
             EventDao eventDao = new EventDao();
+            AuthTokenDao authTokenDao = new AuthTokenDao();
+
             eventDao.setConnection(db.getConnection());
+            authTokenDao.setConnection(db.getConnection());
+
+            // Make sure that the authToken belongs to the provided userName
+            AuthToken authTokenForCheck = authTokenDao.getAuthTokenByUserName(authToken.getUserName());
+
+            if(authTokenForCheck == null) {
+                db.closeConnection();
+                return new EventResult(ApiResult.INVALID_AUTH_TOKEN,
+                        "token of provided authToken does not exist in database.");
+            }
+
+            String tokenFromResponse = authTokenForCheck.getToken();
+            String tokenFromParameter = authToken.getToken();
+
+            if(!tokenFromParameter.equals(tokenFromResponse)) {
+                db.closeConnection();
+                return new EventResult(ApiResult.INVALID_AUTH_TOKEN,
+                        "token of provided authToken does not match token with provided userName");
+            }
 
             // Create eventDao thing where you get all Events
             Event[] allEvents = eventDao.getAllEvents();

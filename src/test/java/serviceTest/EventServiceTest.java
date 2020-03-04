@@ -10,17 +10,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import result.EventResult;
-import result.FillResult;
 import service.EventService;
-import service.FillService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class EventServiceTest {
     private EventService eventService = null;
@@ -149,6 +143,21 @@ public class EventServiceTest {
         Event eventFromEventResult = eventResult.getEvent();
 
         assertNotNull(eventFromEventResult);
+        assertFalse(eventResult.getSuccess());
+    }
+
+    /**
+     * Tests retrieving all events with an invalid authToken
+     */
+    @Test
+    public void getAllEventFail() {
+        boolean codeWorked = false;
+
+        authToken.setUserName("blahblah"); // A bad userName that won't be in the database
+        eventResult = eventService.getAllEvents(authToken);
+        Event[] data = eventResult.getData();
+
+        assertNull(data);
         assertFalse(eventResult.getSuccess());
     }
 

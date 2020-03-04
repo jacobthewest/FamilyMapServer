@@ -30,6 +30,10 @@ public class FillService {
     private final int ADULT_AGE = 18;
     private static final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
     private Random random = new Random();
+    private PersonDao personDao = null;
+    private UserDao userDao = null;
+    private EventDao eventDao = null;
+    private Database db = null;
 
     /**
      * Populates the server's database with generated data for the specified user name.
@@ -45,27 +49,12 @@ public class FillService {
     public FillResult fill(String userName, int generations) {
         setUpDataForFill();
 
-        if(userName == null) {
-            return new FillResult(ApiResult.INVALID_FILL_PARAM, "userName is null");
-        }
-        if(generations < 0) {
-            return new FillResult(ApiResult.INVALID_FILL_PARAM, "Must request non-negative number of " +
-                    "generations. Generations requested: " + generations);
-        }
+        FillResult paramCheck = errorCheckParameters(userName, generations);
+        if(paramCheck != null) return paramCheck;
 
         try {
-            Database db = new Database();
-            db.loadDriver();
-            db.openConnection();
-
-            // Create Daos
-            EventDao eventDao = new EventDao();
-            PersonDao personDao = new PersonDao();
-            UserDao userDao = new UserDao();
-
-            eventDao.setConnection(db.getConnection());
-            personDao.setConnection(db.getConnection());
-            userDao.setConnection(db.getConnection());
+            setUpDatabase();
+            createDaosAndSetConnections();
 
             // The required "username" parameter must be a user already registered with the server
             Person preDeletePersonCopy = personDao.getPersonByAssociatedUsername(userName);
@@ -75,44 +64,30 @@ public class FillService {
             }
 
             // If there is any data in the database already associated with the given user name, it is deleted.
-            eventDao.deleteAllEventsForAssociatedUsername(userName);
-            personDao.deletePerson(preDeletePersonCopy.getPersonID());
+            deletePreExistingUserData(userName, preDeletePersonCopy);
+
+            // Create the root person
+            Person rootPerson = createRootPerson(preDeletePersonCopy);
+
+            setRootPersonAndAddToGeneratedPersons(rootPerson, userName, preDeletePersonCopy);
 
             // Make the user between 18 and 120 years old
             int birthYear = CURRENT_YEAR - random.nextInt((MAX_DEATH_AGE  + 1) - ADULT_AGE);
-            //int currentUserMinDeathDate = CURRENT_YEAR + 1; // Make it so the user can't die upon program startup
 
-            // Create the root person and add them
-            Person rootPerson = createPersonObject(preDeletePersonCopy.getPersonID(),
-                    preDeletePersonCopy.getGender(), preDeletePersonCopy.getLastName());
-            rootPerson.setAssociatedUsername(userName);
-            rootPerson.setPersonID(preDeletePersonCopy.getPersonID());
-            this.generatedPersons.add(rootPerson);
-
-            // Generate the first event of the fill and add it
-            Event childBirth = createEvent("Birth", birthYear, rootPerson); // Makes sure the preDeletePerson is born
-            this.generatedEvents.add(childBirth);
+            generateFillPersonBirthAndAddToGeneratedEvents(birthYear, rootPerson);
 
             // Let the recursion begin. After this function this.generatedEvents and this.generatedPersons
             // will be completely full.
             generateAncestry(rootPerson, birthYear, generations);
 
-            // Insert created Events into database
-            for(Event singleEvent: this.generatedEvents) {
-                eventDao.insertEvent(singleEvent);
-            }
+            // Insert created Events and Persons into database
+            insertEventsAndPersonsIntoDatabase();
 
-            // Insert created Persons into database
-            for(Person singlePerson: this.generatedPersons) {
-                personDao.insertPerson(singlePerson);
-            }
-
-            // Close db connection and return
-            db.closeConnection();
-            return new FillResult(this.generatedPersons.size(), this.generatedEvents.size());
+            // Close db connection, commit, and return a successful FillResult
+            return finishFill();
         } catch(DatabaseException e) {
-            return new FillResult(ApiResult.INTERNAL_SERVER_ERROR, "Error filling with " +
-                    userName + " " + generations);
+            return new FillResult(ApiResult.INTERNAL_SERVER_ERROR, "Error filling with userName: '" +
+                    userName + "' and '" + generations + "' generations. Error: " + e.getMessage());
         }
     }
 
@@ -134,7 +109,7 @@ public class FillService {
     /**
      * Initializes the MALE_NAMES array list.
      */
-    public void setMaleNames() {
+    private void setMaleNames() {
         String[] firstNamesDudes = new String[]{"James", "John", "Michael", "Robert",
                 "David", "Richard", "Joseph", "Charles", "Paul", "Daniel", "Mark", "George", "Steven", "Edward",
                 "Brian", "Donald", "Ronald", "Jose", "Gary", "Timothy", "Joshua", "Raymond", "Andrew", "Jacob", "Henry", "Carl",
@@ -147,7 +122,7 @@ public class FillService {
     /**
      * Initializes the FEMALE_NAMES array list.
      */
-    public void setFemaleNames() {
+    private void setFemaleNames() {
         String[] firstNamesChicks = new String[]{"Mary", "Patricia", "Linda", "Barbara", "Jennifer",
                 "Elizabeth", "Maria", "Holly", "Shannon", "Trudy", "Nancy", "Lisa", "Susan", "Karen", "Natalie",
                 "Katherine", "Ruth", "Donna", "Carol", "Virginia", "Rebecca", "Sarah", "Rachel", "Allison", "Katelyn",
@@ -160,7 +135,7 @@ public class FillService {
     /**
      * Initializes the LAST_NAMES array list.
      */
-    public void setLastNames() {
+    private void setLastNames() {
         String[] lastNames = new String[]{"Smith", "Johnson", "Williams", "Jones", "Brown",
                 "Davis", "Miller", "Wilson", "Moore", "Taylor", "Anderson", "Jackson", "White", "Harris", "Martin", "Pugmire",
                 "Yorgason", "Briggs", "Vanderwerken", "VanCott", "Davidson", "West", "Jacklyn", "Hernandez", "Scott", "Hill",
@@ -176,7 +151,7 @@ public class FillService {
      * Initializes the CITIES array list. Index positions match exactly with the other
      * location array lists to make event creation easier.
      */
-    public void setCities() {
+    private void setCities() {
         String[] cities = new String[]{"Boise", "Salt Lake City", "Ogden", "Orem", "Provo", "Saint George",
                 "Twin Falls", "Rigby", "Jerome", "Fillmore", "Beaver", "Logan", "Brigham City", "Burley", "Rupert", "Rexburg", "Santaquin",
                 "Tooele", "Sandy", "Riverton", "Nephi", "Delta", "Emery", "Price", "Spanish Fork", "West Valley City", "Moab"};
@@ -188,7 +163,7 @@ public class FillService {
     /**
      * Initializes the COUNTRIES array list. Currently we only care about USA cities so her we are.
      */
-    public void setCountries() {
+    private void setCountries() {
         String[] countries = new String[]{"USA"};
         for(String singleCountry: countries) {
             this.COUNTRIES.add(singleCountry);
@@ -199,7 +174,7 @@ public class FillService {
      * Initializes the LATITUDES array list. Index positions match exactly with the other
      * location array lists to make event creation easier.
      */
-    public void setLatitudes() {
+    private void setLatitudes() {
         double[] latitudes = new double[]{43.615791, 40.760780, 41.222759, 40.297119, 40.233845,
                 37.108284, 42.563181, 43.672219, 42.724137, 38.96675, 38.279582, 41.735211, 41.510372, 42.538116,
                 42.616386, 43.826071, 39.97558, 40.534265, 40.569705, 40.518701, 39.71002, 39.352381, 38.923149,
@@ -213,7 +188,7 @@ public class FillService {
      * Initializes the LONGITUDES array list. Index positions match exactly with the other
      * location array lists to make event creation easier.
      */
-    public void setLongitudes() {
+    private void setLongitudes() {
         double[] longitudes = new double[]{-116.201576, -111.891045, -111.970421, -111.695007, -111.658531,
                 -113.583277, -114.460278, -111.914829, -114.518435, -112.323686, -112.641291, -111.834857, -112.015716, -113.793261,
                 -113.67082, -111.789532,  -111.785249, -112.298452, -111.897282, -111.931665, -111.828546, -112.57362, -111.250477,
@@ -227,7 +202,7 @@ public class FillService {
      * Initializes all of the class member variables that we need.
      * I keep this out of the main functions to keep things more clear.
      */
-    public void setUpDataForFill() {
+    private void setUpDataForFill() {
         setMaleNames();
         setFemaleNames();
         setLastNames();
@@ -246,7 +221,7 @@ public class FillService {
      * @param lastName lastName of the person. Is NULL if male
      * @return A Person object representing a child's parent
      */
-    public Person createPersonObject(String personID, String gender, String lastName) {
+    private Person createPersonObject(String personID, String gender, String lastName, boolean isRootPerson) {
         // Randomly make their username, first name, and mom's last name
         String firstName;
         String lastNameCopy = lastName;
@@ -254,6 +229,9 @@ public class FillService {
             firstName = getRandomFemaleName();
             lastNameCopy = getRandomLastName();
         } else {
+            if(isRootPerson) {
+                lastNameCopy = getRandomLastName();
+            }
             firstName = getRandomMaleName();
         }
         Person person = new Person(personID, UUID.randomUUID().toString(), firstName, lastNameCopy,
@@ -268,11 +246,15 @@ public class FillService {
      * @param childBirthYear Year the child was born
      * @param generations The number of generations to generate
      */
-    public void generateAncestry(Person child, int childBirthYear, int generations) {
+    private void generateAncestry(Person child, int childBirthYear, int generations) {
+        if(generations == 0) {
+            return;
+        }
+
         // Generate Mom and Dad
         // Get their personID's from child
-        Person mom = createPersonObject(child.getMotherId(), "f", null);
-        Person dad = createPersonObject(child.getFatherId(), "m", child.getLastName());
+        Person mom = createPersonObject(child.getMotherId(), "f", null, false);
+        Person dad = createPersonObject(child.getFatherId(), "m", child.getLastName(), false);
 
         // dad and mom get spouse id from each other
         mom.setSpouseId(dad.getPersonID());
@@ -284,11 +266,8 @@ public class FillService {
 
         // Marry mom and dad
         // Create identical marriage events just with their own personID's and associatedUsernames
-
         Event momMarriage = generateWifeMarriageEvent(mom, dad, childBirthYear);
-        Event dadMarriage = momMarriage;
-        dadMarriage.setAssociatedUsername(dad.getAssociatedUsername());
-        dadMarriage.setPersonID(dad.getPersonID());
+        Event dadMarriage = generateHusbandMarriage(momMarriage, dad);
 
         // Add the two events to the generatedEventsData
         this.generatedEvents.add(momMarriage);
@@ -299,9 +278,13 @@ public class FillService {
         int dadBirthYear = generateAndAddParentLifeEvents(dad, dadMarriage.getYear());
         int momBirthYear = generateAndAddParentLifeEvents(mom, momMarriage.getYear());
 
+        int parentsMarriageYear = dadMarriage.getYear();
+
         // generateAncestry on dad and mom.
-        generateAncestry(dad, dadBirthYear, (generations - 1));
-        generateAncestry(mom, momBirthYear, (generations - 1));
+        int dadsGenerationsNum = generations - 1;
+        int momsGenerationsNum = generations - 1;
+        generateAncestry(dad, dadBirthYear, dadsGenerationsNum);
+        generateAncestry(mom, momBirthYear, momsGenerationsNum);
     }
 
     /**
@@ -311,7 +294,7 @@ public class FillService {
      * @param person Person for whom the event belongs
      * @return An Event object
      */
-    public Event createEvent(String eventType, int eventYear, Person person) {
+    private Event createEvent(String eventType, int eventYear, Person person) {
         int randomIndexForLocation = random.nextInt(this.CITIES.size());
         String city = this.CITIES.get(randomIndexForLocation);
         double latitude = this.LATITUDES.get(randomIndexForLocation);
@@ -322,13 +305,20 @@ public class FillService {
                 latitude, longitude, country, city, eventType, eventYear);
     }
 
+    private Event generateHusbandMarriage(Event wifeMarriage, Person husband) {
+        return new Event(wifeMarriage.getEventID(), husband.getAssociatedUsername(),
+                husband.getPersonID(), wifeMarriage.getLatitude(), wifeMarriage.getLongitude(),
+                wifeMarriage.getCountry(), wifeMarriage.getCity(), wifeMarriage.getEventType(),
+                wifeMarriage.getYear());
+    }
+
     /**
      * Create a parents birthday, baptism, and maybe death event
      * @param parent Person object representing the parent
      * @param marriageYear The year the parent was married
      * @return The parent's birth year
      */
-    public int generateAndAddParentLifeEvents(Person parent, int marriageYear) {
+    private int generateAndAddParentLifeEvents(Person parent, int marriageYear) {
         // We are assuming people will get married between 18 and 24 years of age
         // So we get their birthYear by saying they are 18 + (0 to 6) years old when they were married.
         int birthYear = marriageYear - (ADULT_AGE + random.nextInt(7));
@@ -340,11 +330,10 @@ public class FillService {
         this.generatedEvents.add(birth);
         this.generatedEvents.add(baptism);
 
-        int currentParentAge = CURRENT_YEAR - birthYear;
+        int parentAgeAtMarriage = marriageYear - birthYear;
 
         // MAX_DEATH_AGE - currentParentAge. I do this so the parent dies at 120 or under.
-        int deathYear = marriageYear + random.nextInt(MAX_DEATH_AGE - currentParentAge);
-
+        int deathYear = marriageYear + random.nextInt(MAX_DEATH_AGE - parentAgeAtMarriage);
         if (deathYear < CURRENT_YEAR) {
             // The parent is dead
             Event death = createEvent("Death", deathYear, parent);
@@ -361,7 +350,7 @@ public class FillService {
      * @param childBirthYear Year the couples child was born
      * @return An Event object representing the marriage
      */
-    public Event generateWifeMarriageEvent(Person wife, Person husband, int childBirthYear) {
+    private Event generateWifeMarriageEvent(Person wife, Person husband, int childBirthYear) {
         int randomIndexForLocation = random.nextInt(this.CITIES.size());
         String city = this.CITIES.get(randomIndexForLocation);
         double latitude = this.LATITUDES.get(randomIndexForLocation);
@@ -378,7 +367,7 @@ public class FillService {
     /**
      * @return A random female name
      */
-    public String getRandomFemaleName() {
+    private String getRandomFemaleName() {
         int randomIndex = random.nextInt(this.FEMALE_NAMES.size());
         return this.FEMALE_NAMES.get(randomIndex);
     }
@@ -386,7 +375,7 @@ public class FillService {
     /**
      @return A random male name
      */
-    public String getRandomMaleName() {
+    private String getRandomMaleName() {
         int randomIndex = random.nextInt(this.MALE_NAMES.size());
         return this.MALE_NAMES.get(randomIndex);
     }
@@ -394,8 +383,90 @@ public class FillService {
     /**
      * @return A random last name
      */
-    public String getRandomLastName() {
+    private String getRandomLastName() {
         int randomIndex = random.nextInt(this.LAST_NAMES.size());
         return this.LAST_NAMES.get(randomIndex);
+    }
+
+    private void createDaosAndSetConnections() {
+        EventDao eventDao = new EventDao();
+        PersonDao personDao = new PersonDao();
+        UserDao userDao = new UserDao();
+
+        eventDao.setConnection(db.getConnection());
+        personDao.setConnection(db.getConnection());
+        userDao.setConnection(db.getConnection());
+    }
+
+    private void insertEventsAndPersonsIntoDatabase() {
+        try {
+            for(Event singleEvent: this.generatedEvents) {
+                eventDao.insertEvent(singleEvent);
+            }
+
+            for(Person singlePerson: this.generatedPersons) {
+                personDao.insertPerson(singlePerson);
+            }
+        } catch(DatabaseException ex) {
+            System.out.println("Problem in insertEventsAndPersonsIntoDatabase() function in FillService class: " + ex.getMessage());
+        }
+    }
+
+    private void setUpDatabase() {
+        try {
+            db = new Database();
+            db.loadDriver();
+            db.openConnection();
+        } catch(DatabaseException ex) {
+            System.out.println("Problem in setUpDatabase() function in FillService class: " + ex.getMessage());
+        }
+    }
+
+    private void setRootPersonAndAddToGeneratedPersons(Person rootPerson, String userName, Person preDeletePersonCopy) {
+        rootPerson.setAssociatedUsername(userName);
+        rootPerson.setPersonID(preDeletePersonCopy.getPersonID());
+        this.generatedPersons.add(rootPerson);
+    }
+
+    private void generateFillPersonBirthAndAddToGeneratedEvents(int birthYear, Person rootPerson) {
+        Event childBirth = createEvent("Birth", birthYear, rootPerson); // Makes sure the preDeletePerson is born
+        this.generatedEvents.add(childBirth);
+    }
+
+    private Person createRootPerson(Person preDeletePersonCopy) {
+        return createPersonObject(preDeletePersonCopy.getPersonID(),
+                preDeletePersonCopy.getGender(), preDeletePersonCopy.getLastName(), true);
+    }
+
+    private FillResult errorCheckParameters(String userName, int generations) {
+        if(userName == null) {
+            return new FillResult(ApiResult.INVALID_FILL_PARAM, "userName is null");
+        }
+        if(generations < 0) {
+            return new FillResult(ApiResult.INVALID_FILL_PARAM, "Must request non-negative number of " +
+                    "generations. Generations requested: " + generations);
+        }
+        return null;
+    }
+
+    private void deletePreExistingUserData(String userName, Person preDeletePersonCopy) {
+        try {
+            eventDao.deleteAllEventsForAssociatedUsername(userName);
+            personDao.deletePerson(preDeletePersonCopy.getPersonID());
+            db.commitConnection(true);
+        } catch(DatabaseException ex) {
+            System.out.println("Problem in deletePreExistingUserData() function in FillService class: " + ex.getMessage());
+        }
+    }
+
+    private FillResult finishFill() {
+        try {
+            db.commitConnection(true);
+            db.closeConnection();
+            return new FillResult(this.generatedPersons.size(), this.generatedEvents.size());
+        } catch(DatabaseException ex) {
+            System.out.println("Problem in finishFill() function in FillService class: " + ex.getMessage());
+        }
+        return null;
     }
 }
