@@ -161,6 +161,11 @@ public class EventServiceTest {
         assertFalse(eventResult.getSuccess());
     }
 
+    /**
+     * Compares two Event objects for being identical
+     * @param one First Event object
+     * @param two Second Event object
+     */
     public void assertEvents(Event one, Event two) {
         assertEquals(one.getAssociatedUsername(), two.getAssociatedUsername());
         assertEquals(one.getEventID(), two.getEventID());

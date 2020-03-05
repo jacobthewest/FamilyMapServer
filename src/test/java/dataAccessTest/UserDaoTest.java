@@ -191,6 +191,7 @@ public class UserDaoTest {
     }
 
 
+
     public void setGenericUser() {
         this.genericUser = new User("userName","passWord", "email@gmail.com",
                 "firstName", "lastName", "m", "personID");

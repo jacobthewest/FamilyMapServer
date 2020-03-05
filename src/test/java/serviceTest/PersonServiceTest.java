@@ -10,7 +10,6 @@ import result.PersonResult;
 import service.PersonService;
 
 import java.sql.Connection;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -152,11 +151,17 @@ public class PersonServiceTest {
         }
     }
 
+    /**
+     * Sets the person member variable
+     */
     private void setPerson() {
         person = new Person("p1", "a1", "f1", "l1",
                 "m", "p5", "p4", "p2");
     }
 
+    /**
+     * Inserts a family of Persons into the database
+     */
     private void insertPeople() {
         try {
             Person spouse = new Person("p2", "a2", "f2", "l2",
@@ -188,10 +193,16 @@ public class PersonServiceTest {
         }
     }
 
+    /**
+     * Sets the authToken member variable
+     */
     private void setAuthToken() {
         authToken = new AuthToken("token", person.getAssociatedUsername());
     }
 
+    /**
+     * Inserts the authToken member variable into the database
+     */
     private void insertAuthToken() {
         try {
             authTokenDao.insertAuthToken(authToken);
@@ -201,6 +212,10 @@ public class PersonServiceTest {
         }
     }
 
+    /**
+     * Gets an authToken from the database using the person member variable
+     * @return An AuthToken from the database
+     */
     private AuthToken getAuthTokenFromDatabase() {
         try {
             AuthToken authTokenFromDB = authTokenDao.getAuthTokenByUserName(person.getAssociatedUsername());
@@ -211,6 +226,13 @@ public class PersonServiceTest {
         return null;
     }
 
+    /**
+     * Compares two Person objects to be equal
+     * @param one First Person
+     * @param two Second Person
+     * @param personTwoIsNull Boolean value saying if the Second Person object is null.
+     *                        It may be null depending on the function call.
+     */
     private void assertPersonsEqual(Person one, Person two, boolean personTwoIsNull) {
 
         if(personTwoIsNull) {

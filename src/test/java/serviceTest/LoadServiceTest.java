@@ -60,9 +60,9 @@ public class LoadServiceTest {
      */
     @Test
     public void loadServicePass() {
-        setuserArray();
-        setpersonArray();
-        seteventArray();
+        setUserArray();
+        setPersonArray();
+        setEventArray();
 
         String expectedString = "Successfully added %d users, %d persons, and %d events to the database.";
         expectedString = String.format(expectedString, userArray.length, personArray.length, eventArray.length);
@@ -79,8 +79,8 @@ public class LoadServiceTest {
      */
     @Test
     public void loadServiceFail() {
-        setuserArray();
-        setpersonArray();
+        setUserArray();
+        setPersonArray();
 
         LoadRequest loadRequest = new LoadRequest(userArray, personArray, null);
         LoadResult loadResult = loadService.load(loadRequest);
@@ -113,7 +113,10 @@ public class LoadServiceTest {
         }
     }
 
-    public void setuserArray() {
+    /**
+     * Sets the userArray member variable with three janky Users
+     */
+    public void setUserArray() {
         User one = new User("u1","p1", "e1", "f1", "l1","m", "p1");
         User two = new User("u2","p2", "e2", "f2", "l2","f", "p2");
         User three = new User("u3","p3", "e3", "f3", "l3","m", "p3");
@@ -125,7 +128,10 @@ public class LoadServiceTest {
         userArray[2] = three;
     }
 
-    public void setpersonArray() {
+    /**
+     * Sets the PersonArray member variable with a family of Persons
+     */
+    public void setPersonArray() {
         Person one = new Person("p1", "a1", "f1", "l1",
                 "m", "f1", "m1", "s1");
         Person two = new Person("p2", "a2", "f2", "l2",
@@ -143,7 +149,10 @@ public class LoadServiceTest {
         personArray[3] = four;
     }
 
-    public void seteventArray() {
+    /**
+     * Sets the eventArray member variable with two janky Events
+     */
+    public void setEventArray() {
         Event one = new Event("e1","a1","p1",56.7123,
                 120.31,"USA","Orem","Bar Mitzvah",2017);
         Event two = new Event("2","a2","p2",3.191,

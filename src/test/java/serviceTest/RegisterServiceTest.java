@@ -102,6 +102,9 @@ public class RegisterServiceTest {
         assertEquals(registerResult.getMessage(), ApiResult.USERNAME_TAKEN);
     }
 
+    /**
+     * Inserts the newUser member variable into the database
+     */
     private void insertNewUser() {
         try {
             userDao.insertUser(newUser);

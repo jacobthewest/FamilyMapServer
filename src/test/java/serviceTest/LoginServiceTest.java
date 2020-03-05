@@ -111,12 +111,18 @@ public class LoginServiceTest {
         assertEquals(loginResult.getMessage(), ApiResult.REQUEST_PROPERTY_MISSING_OR_INVALID);
     }
 
+    /**
+     * Sets the user member variable
+     */
     private void setUser() {
         user = new User("userName","passWord",
                 "email@email.com","firstName","lastName",
                 "m","personID");
     }
 
+    /**
+     * Inserts the user member variable into the database
+     */
     private void insertUser() {
         try {
             userDao.insertUser(user);
@@ -126,6 +132,9 @@ public class LoginServiceTest {
         }
     }
 
+    /**
+     * Inserts the authToken member variable
+     */
     private void insertAuthToken() {
         try {
             authToken = new AuthToken("token", user.getUserName());
@@ -136,6 +145,9 @@ public class LoginServiceTest {
         }
     }
 
+    /**
+     * Sets the authToken member variable from the database and returns it
+     */
     private String getToken() {
         try {
              authToken = authTokenDao.getAuthTokenByUserName(user.getUserName());
