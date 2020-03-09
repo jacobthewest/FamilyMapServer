@@ -5,9 +5,10 @@ package result;
  * <code>/fill</code> and <code>/fill/{generations}</code>
  */
 public class FillResult extends ApiResult {
-    /**
-     * The default message to be sent in the response body upon a successful request
-     */
+
+    private String message;
+    private String description;
+    private boolean success;
     public static final String MESSAGE = "Successfully added %d persons and %d events to the database.";
 
     /**
@@ -17,8 +18,15 @@ public class FillResult extends ApiResult {
      * @param description Description of the error message
      */
     public FillResult(String error, String description) {
-        super(false, error, description);
+        setSuccess(false);
+        setMessage(error);
+        setDescription(description);
     }
+
+    /**
+     * Empty Constructor
+     */
+    public FillResult() {}
 
     /**
      * Creates an ApiResult of a successful request to the <code>/fill</code> and
@@ -27,8 +35,34 @@ public class FillResult extends ApiResult {
      * @param numEventsAdded Int number of persons added from Fill Service
      */
     public FillResult(int numPersonsAdded, int numEventsAdded) {
-        super(true, String.format(MESSAGE, numPersonsAdded, numEventsAdded), null);
+        setSuccess(true);
+        setMessage(String.format(MESSAGE, numPersonsAdded, numEventsAdded));
+        setDescription(null);
     }
 
-    public boolean getSuccess() {return super.getSuccess();}
+    public boolean getSuccess() {return getSuccess();}
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
 }

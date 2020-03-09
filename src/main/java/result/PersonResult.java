@@ -15,6 +15,9 @@ public class PersonResult extends ApiResult {
     private String fatherID;
     private String motherID;
     private String spouseID;
+    private String message;
+    private String description;
+    private boolean success;
 
     /**
      * Creates an ApiResult of a failed request to the <code>/person/[personID]</code> and
@@ -23,14 +26,23 @@ public class PersonResult extends ApiResult {
      * @param description Explanation of the error message
      */
     public PersonResult(String error, String description) {
-        super(false, error, description);
+        setSuccess(false);
+        setMessage(error);
+        setDescription(description);
     }
+
+    /**
+     * Empty Constructor
+     */
+    public PersonResult() {}
 
     /**
      * Creates an ApiResult of a successful request to the <code>/person</code> route.
      */
     public PersonResult(Person[] data) {
-        super(true, null, null);
+        setSuccess(true);
+        setMessage(null);
+        setDescription(null);
         setData(data);
     }
 
@@ -38,7 +50,9 @@ public class PersonResult extends ApiResult {
      * Creates an ApiResult of a successful request to the <code>/person</code> route.
      */
     public PersonResult(Person person) {
-        super(true, null, null);
+        setSuccess(true);
+        setMessage(null);
+        setMessage(null);
         setAssociatedUsername(person.getAssociatedUsername());
         setPersonID(person.getPersonID());
         setFirstName(person.getFirstName());
@@ -126,5 +140,29 @@ public class PersonResult extends ApiResult {
         this.spouseID = spouseID;
     }
 
-    public boolean getSuccess() {return super.getSuccess();}
+    public boolean getSuccess() {return getSuccess();}
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
 }

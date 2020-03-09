@@ -1,3 +1,5 @@
+package util;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -16,5 +18,4 @@ public class ObjectEncoder {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         return gson.fromJson(inputStreamReader, classType);
     }
-
 }

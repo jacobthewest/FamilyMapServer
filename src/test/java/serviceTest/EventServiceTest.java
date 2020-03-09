@@ -101,7 +101,7 @@ public class EventServiceTest {
      */
     @Test
     public void getSingleEventPass() {
-        eventResult = eventService.getEvent(event.getEventID(), authToken);
+        eventResult = eventService.getEvent(event.getEventID(), authToken.getToken());
         Event eventFromEventResult = eventResult.getEvent();
 
         assertNotNull(eventResult);
@@ -114,7 +114,7 @@ public class EventServiceTest {
      */
     @Test
     public void getAllEventsPass() {
-        eventResult = eventService.getAllEvents(authToken);
+        eventResult = eventService.getAllEvents(authToken.getToken());
         Event[] data = eventResult.getData();
 
         assertNotNull(eventResult);
@@ -139,7 +139,7 @@ public class EventServiceTest {
         boolean codeWorked = false;
 
         authToken.setUserName("blahblah"); // A bad userName that won't be in the database
-        eventResult = eventService.getEvent(event.getEventID(), authToken);
+        eventResult = eventService.getEvent(event.getEventID(), authToken.getToken());
         Event eventFromEventResult = eventResult.getEvent();
 
         assertNotNull(eventFromEventResult);
@@ -154,7 +154,7 @@ public class EventServiceTest {
         boolean codeWorked = false;
 
         authToken.setUserName("blahblah"); // A bad userName that won't be in the database
-        eventResult = eventService.getAllEvents(authToken);
+        eventResult = eventService.getAllEvents(authToken.getToken());
         Event[] data = eventResult.getData();
 
         assertNull(data);

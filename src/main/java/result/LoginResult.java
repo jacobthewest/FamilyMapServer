@@ -8,13 +8,25 @@ public class LoginResult extends ApiResult {
     private String token;
     private String userName;
     private String personID;
+    private String message;
+    private String description;
+    private boolean success;
 
     /**
      * Creates an ApiResult of a failed request to the <code>/user/login</code> route.
      * @param error The error message for the failed login attempt
      * @param description Description of the error message
      */
-    public LoginResult(String error, String description) {super(false, error, description);}
+    public LoginResult(String error, String description) {
+        setSuccess(false);
+        setMessage(error);
+        setDescription(description);
+    }
+
+    /**
+     * Empty Constructor
+     */
+    public LoginResult(){}
 
     /**
      * Creates an ApiResult of a successful request to the <code>/user/login</code> route.
@@ -23,7 +35,9 @@ public class LoginResult extends ApiResult {
      * @param personID String personID from LoginRequest
      */
     public LoginResult(String token, String userName, String personID) {
-        super(true, null, null);
+        setSuccess(true);
+        setMessage(null);
+        setDescription(null);
         setToken(token);
         setUserName(userName);
         setPersonID(personID);
@@ -41,7 +55,7 @@ public class LoginResult extends ApiResult {
         return personID;
     }
 
-    public boolean getSuccess() {return super.getSuccess();}
+    public boolean getSuccess() {return getSuccess();}
 
     public void setToken(String token) {
         this.token = token;
@@ -53,5 +67,29 @@ public class LoginResult extends ApiResult {
 
     public void setPersonID(String personID) {
         this.personID = personID;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 }

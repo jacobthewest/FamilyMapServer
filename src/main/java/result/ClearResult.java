@@ -3,12 +3,35 @@ package result;
 /**
  * Class to represent the results of a request to the API route <code>/clear</code>
  */
-public class ClearResult extends ApiResult {
-
-    /**
-     * Response body message to be displayed upon a successful request
-     */
+public class ClearResult {
+    private String message;
+    private String description;
+    private boolean success;
     private static final String MESSAGE = "Clear succeeded.";
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
 
     /**
      * Creates an ApiResult of a failed request to the <code>/clear</code> route.
@@ -16,15 +39,19 @@ public class ClearResult extends ApiResult {
      * @param description Description of the error message
      */
     public ClearResult(String error, String description) {
-        super(false, error, description);
+        setSuccess(false);
+        setMessage(error);
+        setDescription(description);
     }
 
     /**
      * Creates an ApiResult of a successful request to the <code>/clear</code> route.
      */
     public ClearResult() {
-        super(true, MESSAGE, null);
+        setSuccess(true);
+        setMessage(MESSAGE);
+        setDescription(null);
     }
 
-    public boolean getSuccess() {return super.getSuccess();}
+    public boolean getSuccess() {return getSuccess();}
 }

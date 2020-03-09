@@ -1,13 +1,9 @@
 package result;
 
 /**
- * Parent class for all child results to inherit from.
+ * Parent class for all error messages.
  */
 public class ApiResult {
-    private String message;
-    private String description;
-    private boolean success;
-
     public static final String REQUEST_PROPERTY_MISSING_OR_INVALID = "" +
             "Request property missing or has invalid value";
     public static final String USERNAME_TAKEN = "" +
@@ -28,37 +24,4 @@ public class ApiResult {
             "Invalid eventID parameter";
     public static final String REQUESTED_EVENT_NO_RELATION = "" +
             "Requested event does not belong to this user";
-
-    /**
-     * Creates a new API result
-     *
-     * @param success If the ApiRequest was successful in returning data.
-     * @param message A generic label of why the ApiRequest failed.
-     * @param description A specific description of why the ApiRequest failed.
-     */
-    public ApiResult(boolean success, String message, String description) {
-        setSuccess(success);
-        setMessage(message);
-        setDescription(description);
-    }
-
-    public boolean getSuccess() {
-        return success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getDescription() {return description;}
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setDescription(String description) {this.description = description;}
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
 }

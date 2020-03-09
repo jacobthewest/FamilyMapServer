@@ -17,6 +17,9 @@ public class EventResult extends ApiResult {
     private String city;
     private String eventType;
     private int year;
+    private String message;
+    private String description;
+    private boolean success;
 
     /**
      * Creates an ApiResult of a failed request to the <code>/event</code> and
@@ -25,7 +28,9 @@ public class EventResult extends ApiResult {
      * @param description Description of the error message
      */
     public EventResult(String error, String description) {
-        super(false, error, description);
+        setSuccess(false);
+        setMessage(error);
+        setDescription(description);
     }
 
     /**
@@ -34,9 +39,16 @@ public class EventResult extends ApiResult {
      * @param data An array of Event objects
      */
     public EventResult(Event[] data) {
-        super(true, null, null);
+        setSuccess(true);
+        setMessage(null);
+        setDescription(null);
         setData(data);
     }
+
+    /**
+     * Empty Constructor
+     */
+    public EventResult() {}
 
     /**
      * Creates an ApiResult for a successful request to
@@ -44,7 +56,9 @@ public class EventResult extends ApiResult {
      * @param event An event object to be displayed in the response body
      */
     public EventResult(Event event) {
-        super(true, null, null);
+        setSuccess(true);
+        setMessage(null);
+        setDescription(null);
         setEvent(event);
     }
 
@@ -104,7 +118,7 @@ public class EventResult extends ApiResult {
         return year;
     }
 
-    public boolean getSuccess() {return super.getSuccess();}
+    public boolean getSuccess() {return getSuccess();}
 
     public void setData(Event[] data) {
         this.data = data;
@@ -161,5 +175,29 @@ public class EventResult extends ApiResult {
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 }

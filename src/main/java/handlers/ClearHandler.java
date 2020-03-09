@@ -2,50 +2,117 @@ package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 
 import result.ClearResult;
 import service.ClearService;
+import util.ObjectEncoder;
 
 import java.io.IOException;
 
 public class ClearHandler implements HttpHandler {
 
+    // URL Path: /clear
+    // HTTP Method: POST
+    // Auth Token Required: No
+
     public final int RESPONSE_LENGTH = 0;
+    public final String URL = "/clear";
     public final String HTTP_METHOD = "POST";
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+        boolean errorFree = true;
 
-        // HTTP Method: POST
-        // Auth Token Required: No
+        // set the result and service
+        ClearService clearService = new ClearService();
+        ClearResult clearResult = new ClearResult();
 
-        // Verify only HTTP Method
+
+        // validate the HTTP exchange
         if(!isValidHttpMethod(httpExchange)) {
-            // param 1 = response code to send. param2 = Don't worry, just let it be zero.
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, RESPONSE_LENGTH);
-            httpExchange.close();
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+            clearResult.setSuccess(false);
+            clearResult.setMessage("Http 400, Bad Request");
+            clearResult.setDescription("Invalid HTTP method. Method should be " + HTTP_METHOD);
+            errorFree = false;
         }
 
-        ClearService clearService = new ClearService();
-        ClearResult clearResult = clearService.clear();
+        // Check for invalid URL path
+        String url = httpExchange.getRequestURI().toString();
+        if(!url.toLowerCase().equals(URL)) {
+            // Invalid URL
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, RESPONSE_LENGTH);
+            clearResult.setSuccess(false);
+            clearResult.setMessage("Http 400, Bad Request");
+            clearResult.setDescription("Invalid URL. URL should be " + URL);
+            errorFree = false;
+        }
 
-        // Serialize the object
-        // Get responsebody from httpexchnage
-        // write to responsebody with serialized json
-        // close response body.
-        // We are good.
+        // Valid Request. Send the HTTP OK
+        if(errorFree) {
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+            clearResult = clearService.clear();
+        }
+        try {
+            // Serialize the Result Object
+            ObjectEncoder objectEncoder = new ObjectEncoder();
+            String json = objectEncoder.serialize(clearResult);
+
+            // Get response body from HTTP Exchange
+            OutputStream outputStream = httpExchange.getResponseBody();
+
+            // Create an OutputStreamWriter from the outputStream we get from httpExchange.getResponseBody()
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+
+            // Write to response body with the serialized json we made using the OutputStreamWriter
+            outputStreamWriter.write(json);
+
+            // Flush the outputStreamWriter
+            outputStreamWriter.flush();
+
+            // Close the outputStream
+            outputStream.close();
+
+            // Close the Http Exchange.getResponseBody
+            httpExchange.getResponseBody().close();
+        } catch(IOException e) {
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, RESPONSE_LENGTH);
+            clearResult.setSuccess(false);
+            clearResult.setMessage("Internal Server Error");
+            clearResult.setDescription("Error: " + e.getMessage());
+            ObjectEncoder objectEncoder = new ObjectEncoder();
+            String json = objectEncoder.serialize(clearResult);
+            OutputStream outputStream = httpExchange.getResponseBody();
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+            outputStreamWriter.write(json);
+            outputStreamWriter.flush();
+            outputStream.close();
+            httpExchange.getResponseBody().close();
+        }
     }
 
+    /**
+     * Gets the http method used (post, get, put, etc.)
+     * @param exchange An HttpExchange object
+     * @return All-caps String of the http method
+     */
     private String getHttpMethod(HttpExchange exchange) {
         String httpMethod = exchange.getRequestMethod().toUpperCase();
         return httpMethod;
     }
 
+    /**
+     *
+     * @param exchange An HttpExchange object
+     * @return If the method in the request matches the method of the handler
+     */
     private boolean isValidHttpMethod(HttpExchange exchange) {
         if(getHttpMethod(exchange).equals(HTTP_METHOD)) return true;
         return false;
     }
 }
-
 

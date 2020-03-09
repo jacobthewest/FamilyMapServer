@@ -231,6 +231,35 @@ public class AuthTokenDao {
     }
 
     /**
+     * Returns a User from the database if it exist in it based off the User's userName
+     * @param token String identifier unique to the AuthToken object to retrieve
+     * @return A User object from the query
+     * @throws DatabaseException Error with database operation
+     */
+    public AuthToken getAuthTokenByToken(String token) throws DatabaseException{
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        AuthToken authToken = null;
+        try {
+            stmt = connection.prepareStatement(SELECT_BY_TOKEN);
+            stmt.setString(1, token);
+            rs = stmt.executeQuery();
+
+            String userName = null;
+            while (rs.next()) {
+                userName = rs.getString(1);
+                authToken = new AuthToken(token, userName);
+            }
+            if(rs != null) rs.close();
+            if(stmt != null) stmt.close();
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when selecting AuthToken object: " + e);
+        }
+        return authToken;
+    }
+
+    /**
      * Checks to see if an AuthToken table exists and can be accessed
      * @return If the table is able to be accessed
      * @throws DatabaseException An error performing the operation

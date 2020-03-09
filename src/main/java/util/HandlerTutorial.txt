@@ -1,0 +1,15 @@
+    Set the ClearResult to null and instantiate the ClearService
+    Validate the HTTP exchange
+        Bad? # params in uri, null authToken if one is needed, wrong http method
+            Send http BAD REQUEST
+            Set the clearResult object message, description, and success
+        Good?
+            Send the http ok
+    Serialize the clearResult object
+    Get response body from HTTP Exchange
+    Create an OutputStreamWriter from the outputStream we get from httpExchange.getResponseBody()
+    Write to response body with the serialized json we made using the OutputStreamWriter
+    Flush the outputStreamWriter
+    Close the outputStream
+    Close the Http Exchange.getResponseBody
+    Done

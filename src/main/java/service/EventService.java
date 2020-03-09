@@ -19,12 +19,15 @@ public class EventService {
      *
      * @param eventID The identifier of the event we will retrieve from
      *                the database
-     * @param authToken The authToken needed to obtain the event
+     * @param token The token needed to obtain the event
      * @return The eventResult containing an error message or an Event object
      */
-    public EventResult getEvent(String eventID, AuthToken authToken) {
+    public EventResult getEvent(String eventID, String token) {
         if (eventID == null) {
             return new EventResult(ApiResult.INVALID_EVENT_ID_PARAM,"eventID is null");
+        }
+        if(token == null) {
+            return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "Token is null");
         }
         try {
             // Set up DB
@@ -32,15 +35,19 @@ public class EventService {
             db.loadDriver();
             db.openConnection();
 
+            // Set up Daos and get Event
+            EventDao eventDao = new EventDao();
+            AuthTokenDao authTokenDao = new AuthTokenDao();
+            eventDao.setConnection(db.getConnection());
+            authTokenDao.setConnection(db.getConnection());
+
+            Event returnedEvent = eventDao.getEventByEventID(eventID);
+
+            AuthToken authToken = authTokenDao.getAuthTokenByToken(token);
             if(authToken.getUserName() == null) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
             }
-
-            // Set up Daos and get Event
-            EventDao eventDao = new EventDao();
-            eventDao.setConnection(db.getConnection());
-            Event returnedEvent = eventDao.getEventByEventID(eventID);
 
             // userName in AuthToken MUST match associatedUsername in Event
             if(!returnedEvent.getAssociatedUsername().equals(authToken.getUserName())) {
@@ -60,21 +67,21 @@ public class EventService {
     /**
      * Implements the <code>/event</code> API route.
      *
-     * @param authToken AuthToken needed for the request
+     * @param token AuthToken needed for the request
      *
      * @return Returns ALL events for ALL family members of the current user. The current
      * user is determined from the provided auth token
      */
-    public EventResult getAllEvents(AuthToken authToken) {
+    public EventResult getAllEvents(String token) {
         try {
             // Set up DB
             Database db = new Database();
             db.loadDriver();
             db.openConnection();
 
-            if(authToken.getUserName() == null) {
+            if(token == null) {
                 db.closeConnection();
-                return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
+                return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "Token is null");
             }
 
             // Set up Daos and get Event
@@ -83,6 +90,12 @@ public class EventService {
 
             eventDao.setConnection(db.getConnection());
             authTokenDao.setConnection(db.getConnection());
+
+            AuthToken authToken = authTokenDao.getAuthTokenByUserName(token);
+            if(authToken.getUserName() == null) {
+                db.closeConnection();
+                return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
+            }
 
             // Make sure that the authToken belongs to the provided userName
             AuthToken authTokenForCheck = authTokenDao.getAuthTokenByUserName(authToken.getUserName());
