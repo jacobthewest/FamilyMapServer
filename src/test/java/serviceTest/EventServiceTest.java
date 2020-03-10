@@ -140,7 +140,7 @@ public class EventServiceTest {
         public void getSingleEventFail() {
         boolean codeWorked = false;
 
-        authToken.setToken("blahblah"); // A bad token that won't be in the database
+        authToken.setToken("blahblah"); // A bad authToken that won't be in the database
         eventResult = eventService.getEvent(event.getEventID(), authToken.getToken());
         Event eventFromEventResult = eventResult.getEvent();
 
@@ -155,7 +155,7 @@ public class EventServiceTest {
     public void getAllEventFail() {
         boolean codeWorked = false;
 
-        authToken.setToken("blahblah"); // A bad token that won't be in the database
+        authToken.setToken("blahblah"); // A bad authToken that won't be in the database
         eventResult = eventService.getAllEvents(authToken.getToken());
         Event[] data = eventResult.getData();
 

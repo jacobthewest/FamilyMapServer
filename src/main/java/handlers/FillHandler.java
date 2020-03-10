@@ -55,7 +55,6 @@ public class FillHandler implements HttpHandler {
 
         // Valid Request. Send the HTTP OK
         if(errorFree) {
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
             int urlLength = getUrlLength(httpExchange);
             String username = getUserName(httpExchange);
             if(urlLength == 2) {
@@ -63,6 +62,11 @@ public class FillHandler implements HttpHandler {
             } else if (urlLength == 3) {
                 int generations = getGenerations(httpExchange);
                 fillResult = fillService.fill(username, generations);
+            }
+            if(fillResult.getSuccess()) {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+            } else {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
             }
         }
         try {

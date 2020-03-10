@@ -19,6 +19,7 @@ public class ClearService {
             Database db = new Database();
             db.loadDriver();
             db.openConnection();
+//            db.initializeTables();
             db.emptyTables();
             db.commitConnection(true);
 

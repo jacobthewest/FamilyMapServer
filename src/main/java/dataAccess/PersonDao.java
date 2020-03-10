@@ -105,6 +105,31 @@ public class PersonDao {
         }
     }
 
+    /**
+     * Gets a count of all Persons in the Person table
+     * @return The number of Users in the Person table
+     */
+    public int getCountOfAllPersons(String associatedUsername) throws DatabaseException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+        try {
+            stmt = connection.prepareStatement("SELECT * FROM Person WHERE associatedUsername = ?");
+            stmt.setString(1, associatedUsername);
+            stmt.executeQuery();
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                count++;
+            }
+            stmt.close();
+            rs.close();
+            return count;
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when getting count from Person table: " + e);
+        }
+    }
+
 
     /**
      * Inserts a user into the SQLite Database if they do not already exist in it
@@ -263,34 +288,33 @@ public class PersonDao {
     public Person[] getAllPersons(String associatedUsername) throws DatabaseException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        Person self = null;
-        Person father = null;
-        Person mother = null;
-        Person spouse = null;
+        int numberOfPersons = getCountOfAllPersons(associatedUsername);
+        Person[] data = new Person[numberOfPersons];
         try {
-            stmt = connection.prepareStatement("SELECT personID FROM PERSON WHERE " +
+            stmt = connection.prepareStatement("SELECT * FROM PERSON WHERE " +
                     "associatedUsername = ?");
             stmt.setString(1, associatedUsername);
             rs = stmt.executeQuery();
+            int arrayCounter = 0;
+
             while(rs.next()) {
-                String selfID = rs.getString(1);
-                self = getPersonByPersonID(selfID);
-                if(self.getFatherId() != null) {
-                    father = getPersonByPersonID(self.getFatherId());
-                }
-                if(self.getMotherId() != null) {
-                    mother = getPersonByPersonID(self.getMotherId());
-                }
-                if(self.getSpouseId() != null) {
-                    spouse = getPersonByPersonID(self.getSpouseId());
-                }
+                Person tempPerson = new Person(rs.getString(1), rs.getString(2));
+                tempPerson.setFirstName(rs.getString(3));
+                tempPerson.setLastName(rs.getString(4));
+                tempPerson.setGender(rs.getString(5));
+                tempPerson.setFatherId(rs.getString(6));
+                tempPerson.setMotherId(rs.getString(7));
+                tempPerson.setSpouseId(rs.getString(8));
+
+                data[arrayCounter] = tempPerson;
+                arrayCounter++;
             }
-//            Person[] returnArray = {self, father, mother, spouse};
-            Person[] returnArray = {father, mother, spouse};
-            return returnArray;
+            if(rs != null) rs.close();
+            if(stmt != null) stmt.close();
         } catch(Exception e) {
             return null;
         }
+        return data;
     }
 
 

@@ -41,24 +41,17 @@ public class RegisterHandler implements HttpHandler {
             errorFree = false;
         }
 
-        // Check for invalid URL path
-        String url = httpExchange.getRequestURI().toString();
-        if(!isValidURL(httpExchange)) {
-            // Invalid URL
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
-            registerResult.setSuccess(false);
-            registerResult.setMessage("Http 400, Bad Request");
-            registerResult.setDescription("Invalid URL. URL should be '/fill/[username]' or '/fill/[username]/{generations}}'");
-            errorFree = false;
-        }
-
         // Valid Request. Send the HTTP OK
         if(errorFree) {
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
             InputStream inputStream = httpExchange.getRequestBody();
             ObjectEncoder objectEncoder = new ObjectEncoder();
             registerRequest = (RegisterRequest) objectEncoder.deserialize(inputStream, RegisterRequest.class);
             registerResult = registerService.register(registerRequest);
+            if(registerResult.getSuccess()) {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+            } else {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+            }
         }
         try {
             // Serialize the Result Object

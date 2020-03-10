@@ -43,8 +43,12 @@ public class ClearHandler implements HttpHandler {
 
         // Valid Request. Send the HTTP OK
         if(errorFree) {
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
             clearResult = clearService.clear();
+            if(clearResult.getSuccess()) {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+            } else {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+            }
         }
         try {
             // Serialize the Result Object

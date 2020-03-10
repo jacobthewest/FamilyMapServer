@@ -66,14 +66,19 @@ public class EventHandler implements HttpHandler {
 
         // Valid Request. Send the HTTP OK
         if(errorFree) {
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
             int urlLength = getUrlLength(httpExchange);
-            String token = httpExchange.getRequestHeaders().getFirst(AUTHORIZATION);
+            String authToken = httpExchange.getRequestHeaders().getFirst(AUTHORIZATION);
             if(urlLength == 1) {
-                eventResult = eventService.getAllEvents(token);
+                eventResult = eventService.getAllEvents(authToken);
             } else if (urlLength == 2) {
                 String eventID = getEventID(httpExchange);
-                eventResult = eventService.getEvent(eventID, token);
+                eventResult = eventService.getEvent(eventID, authToken);
+            }
+
+            if(eventResult.getSuccess()) {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+            } else {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
             }
         }
         try {
@@ -120,8 +125,8 @@ public class EventHandler implements HttpHandler {
      * @return If the authToken is valid
      */
     private boolean isValidAuthToken(HttpExchange httpExchange) {
-        String token = httpExchange.getRequestHeaders().getFirst(AUTHORIZATION);
-        if(token.equals(null)) {
+        String authToken = httpExchange.getRequestHeaders().getFirst(AUTHORIZATION);
+        if(authToken.equals(null)) {
             return false;
         } return true;
     }
@@ -160,7 +165,8 @@ public class EventHandler implements HttpHandler {
      */
     private int getUrlLength(HttpExchange httpExchange) {
         String url = httpExchange.getRequestURI().toString();
-        String[] urlParts = url.split("/");
-        return urlParts.length;
+        if(url.equals("/event")) {return 1;}
+        else if (url.contains("/event/")) {return 2;}
+        return 666;
     }
 }

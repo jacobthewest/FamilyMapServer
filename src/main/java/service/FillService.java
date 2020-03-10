@@ -414,6 +414,8 @@ public class FillService {
             db = new Database();
             db.loadDriver();
             db.openConnection();
+            db.initializeTables();
+            db.commitConnection(true);
         } catch(DatabaseException ex) {
             System.out.println("Problem in setUpDatabase() function in FillService class: " + ex.getMessage());
         }

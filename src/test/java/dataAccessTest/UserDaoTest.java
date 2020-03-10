@@ -61,7 +61,7 @@ public class UserDaoTest {
         }
 
         assertEquals(returnedUser.getUserName(), "userName");
-        assertEquals(returnedUser.getPassWord(), "passWord");
+        assertEquals(returnedUser.getPassword(), "password");
         assertEquals(returnedUser.getEmail(), "email@gmail.com");
         assertEquals(returnedUser.getFirstName(), "firstName");
         assertEquals(returnedUser.getLastName(), "lastName");
@@ -146,7 +146,7 @@ public class UserDaoTest {
         }
 
         assertEquals(genericUser.getUserName(), returnedUser.getUserName());
-        assertEquals(genericUser.getPassWord(), returnedUser.getPassWord());
+        assertEquals(genericUser.getPassword(), returnedUser.getPassword());
         assertEquals(genericUser.getEmail(), returnedUser.getEmail());
         assertEquals(genericUser.getFirstName(), returnedUser.getFirstName());
         assertEquals(genericUser.getLastName(), returnedUser.getLastName());
@@ -193,7 +193,7 @@ public class UserDaoTest {
 
 
     public void setGenericUser() {
-        this.genericUser = new User("userName","passWord", "email@gmail.com",
+        this.genericUser = new User("userName","password", "email@gmail.com",
                 "firstName", "lastName", "m", "personID");
     }
 

@@ -6,9 +6,8 @@ import model.Person;
  * Class to represent the results of a request to the API route <code>/person/[personID]</code>
  */
 public class PersonResult extends ApiResult {
-    private Person[] data;
-    private String associatedUsername;
     private String personID;
+    private String associatedUsername;
     private String firstName;
     private String lastName;
     private String gender;
@@ -16,8 +15,9 @@ public class PersonResult extends ApiResult {
     private String motherID;
     private String spouseID;
     private String message;
-    private String description;
     private boolean success;
+    private String description;
+    private Person[] data;
 
     /**
      * Creates an ApiResult of a failed request to the <code>/person/[personID]</code> and

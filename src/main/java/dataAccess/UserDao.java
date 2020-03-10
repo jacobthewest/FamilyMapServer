@@ -101,7 +101,7 @@ public class UserDao {
 
             stmt = connection.prepareStatement(INSERT_SQL);
             stmt.setString(1, user.getUserName());
-            stmt.setString(2, user.getPassWord());
+            stmt.setString(2, user.getPassword());
             stmt.setString(3, user.getEmail());
             stmt.setString(4, user.getFirstName());
             stmt.setString(5, user.getLastName());
@@ -227,7 +227,7 @@ public class UserDao {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(INSERT_SQL);
-            stmt.setString(1, user.getPassWord());
+            stmt.setString(1, user.getPassword());
             stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getFirstName());
             stmt.setString(4, user.getLastName());

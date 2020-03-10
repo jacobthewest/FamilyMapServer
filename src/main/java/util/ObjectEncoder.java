@@ -14,7 +14,7 @@ public class ObjectEncoder {
     }
 
     public Object deserialize(InputStream inputStream, Class<?> classType) {
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         return gson.fromJson(inputStreamReader, classType);
     }

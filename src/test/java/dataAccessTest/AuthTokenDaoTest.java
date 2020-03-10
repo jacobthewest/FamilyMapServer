@@ -64,7 +64,7 @@ public class AuthTokenDaoTest {
             db.commitConnection(false);
         }
 
-        assertEquals(returnedAuthToken.getToken(), "token");
+        assertEquals(returnedAuthToken.getToken(), "authToken");
         assertEquals(returnedAuthToken.getUserName(), "userName");
     }
 
@@ -87,7 +87,7 @@ public class AuthTokenDaoTest {
     }
 
     /**
-     * Tests inserting a AuthToken with a token that has already been used
+     * Tests inserting a AuthToken with a authToken that has already been used
      * @throws DatabaseException Error encountered while performing the operation
      */
     @Test
@@ -96,7 +96,7 @@ public class AuthTokenDaoTest {
         try {
             setGenericAuthToken();
             insertGenericAuthToken();
-            AuthToken badDataAuthToken = new AuthToken("token", "badUserName");
+            AuthToken badDataAuthToken = new AuthToken("authToken", "badUserName");
             authTokenDao.insertAuthToken(badDataAuthToken);
             myCodeHandledIt = false;
             db.commitConnection(true);
@@ -163,7 +163,7 @@ public class AuthTokenDaoTest {
 
 
     public void setGenericAuthToken() {
-        this.authToken = new AuthToken("token", "userName");
+        this.authToken = new AuthToken("authToken", "userName");
     }
 
     public void insertGenericAuthToken() throws DatabaseException {

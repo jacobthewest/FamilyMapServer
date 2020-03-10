@@ -25,7 +25,7 @@ public class RegisterRequest {
 
     public void setUser(User user) {
         this.userName = user.getUserName();
-        this.password = user.getPassWord();
+        this.password = user.getPassword();
         this.email = user.getEmail();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();

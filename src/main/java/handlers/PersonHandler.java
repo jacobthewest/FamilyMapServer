@@ -65,14 +65,19 @@ public class PersonHandler implements HttpHandler {
 
         // Valid Request. Send the HTTP OK
         if(errorFree) {
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
             int urlLength = getUrlLength(httpExchange);
-            String token = getToken(httpExchange);
+            String authToken = httpExchange.getRequestHeaders().getFirst(AUTHORIZATION);
             if(urlLength == 1) {
-                personResult = personService.getAllPersons(token);
+                personResult = personService.getAllPersons(authToken);
             } else if (urlLength == 2) {
                 String personID = getPersonID(httpExchange);
-                personResult = personService.getPerson(personID, token);
+                personResult = personService.getPerson(personID, authToken);
+            }
+
+            if(personResult.getSuccess()) {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+            } else {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
             }
         }
         try {
@@ -136,8 +141,8 @@ public class PersonHandler implements HttpHandler {
      * @return If the authToken is valid
      */
     private boolean isValidAuthToken(HttpExchange httpExchange) {
-        String token = getToken(httpExchange);
-        if(token.equals(null)) {
+        String authToken = httpExchange.getRequestHeaders().getFirst(AUTHORIZATION);
+        if(authToken.equals(null)) {
             return false;
         } return true;
     }
@@ -162,20 +167,10 @@ public class PersonHandler implements HttpHandler {
         return false;
     }
 
-    private String getToken(HttpExchange exchange) {
-        try {
-            String authToken = exchange.getRequestHeaders().getFirst(AUTHORIZATION);
-            return authToken;
-        } catch (Exception e) {
-            System.err.println("PersonHandler found invalid AuthToken in request");
-            return null;
-        }
-    }
-
     private String getPersonID(HttpExchange httpExchange) {
         String url = httpExchange.getRequestURI().toString();
         String[] urlParts = url.split("/");
-        return urlParts[1];
+        return urlParts[2];
     }
 
     /**
@@ -184,7 +179,8 @@ public class PersonHandler implements HttpHandler {
      */
     private int getUrlLength(HttpExchange httpExchange) {
         String url = httpExchange.getRequestURI().toString();
-        String[] urlParts = url.split("/");
-        return urlParts.length;
+        if(url.equals("/person")) {return 1;}
+        else if (url.contains("/person/")) {return 2;}
+        return 666;
     }
 }

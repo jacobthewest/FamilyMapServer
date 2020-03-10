@@ -38,24 +38,17 @@ public class LoadHandler implements HttpHandler {
             errorFree = false;
         }
 
-        // Check for invalid URL path
-        String url = httpExchange.getRequestURI().toString();
-        if(!isValidURL(httpExchange)) {
-            // Invalid URL
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
-            loadResult.setSuccess(false);
-            loadResult.setMessage("Http 400, Bad Request");
-            loadResult.setDescription("Invalid URL. URL should be '/fill/[username]' or '/fill/[username]/{generations}}'");
-            errorFree = false;
-        }
-
         // Valid Request. Send the HTTP OK
         if(errorFree) {
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
             InputStream inputStream = httpExchange.getRequestBody();
             ObjectEncoder objectEncoder = new ObjectEncoder();
             loadRequest = (LoadRequest) objectEncoder.deserialize(inputStream, LoadRequest.class);
             loadResult = loadService.load(loadRequest);
+            if(loadResult.getSuccess()) {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+            } else {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+            }
         }
         try {
             // Serialize the Result Object
@@ -113,20 +106,5 @@ public class LoadHandler implements HttpHandler {
     private String getHttpMethod(HttpExchange exchange) {
         String httpMethod = exchange.getRequestMethod().toUpperCase();
         return httpMethod;
-    }
-
-    /**
-     * Checks for a valid URL
-     * @param httpExchange Http Exchange object
-     * @return If the url is valid
-     */
-    private boolean isValidURL(HttpExchange httpExchange) {
-        String url = httpExchange.getRequestURI().toString();
-        String[] urlParts = url.split("/");
-        if(urlParts.length != 1) {
-            return false;
-        }
-        if(!url.contains("/load")) return false;
-        return true;
     }
 }

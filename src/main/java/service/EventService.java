@@ -19,14 +19,14 @@ public class EventService {
      *
      * @param eventID The identifier of the event we will retrieve from
      *                the database
-     * @param token The token needed to obtain the event
+     * @param authToken The authToken needed to obtain the event
      * @return The eventResult containing an error message or an Event object
      */
-    public EventResult getEvent(String eventID, String token) {
+    public EventResult getEvent(String eventID, String authToken) {
         if (eventID == null) {
             return new EventResult(ApiResult.INVALID_EVENT_ID_PARAM,"eventID is null");
         }
-        if(token == null) {
+        if(authToken == null) {
             return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "Token is null");
         }
         try {
@@ -34,6 +34,8 @@ public class EventService {
             Database db = new Database();
             db.loadDriver();
             db.openConnection();
+            db.initializeTables();
+            db.commitConnection(true);
 
             // Set up Daos and get Event
             EventDao eventDao = new EventDao();
@@ -42,22 +44,26 @@ public class EventService {
             authTokenDao.setConnection(db.getConnection());
 
             Event returnedEvent = eventDao.getEventByEventID(eventID);
+            if(returnedEvent == null) {
+                db.closeConnection();
+                return new EventResult(ApiResult.INVALID_EVENT_ID_PARAM, "No event was returned with the eventID: " + eventID);
+            }
 
-            AuthToken authToken = authTokenDao.getAuthTokenByToken(token);
-            if(authToken == null) {
+            AuthToken returnedAuthToken = authTokenDao.getAuthTokenByToken(authToken);
+            if(returnedAuthToken == null) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken is null and not found in database.");
             }
-            if(authToken.getUserName() == null) {
+            if(returnedAuthToken.getUserName() == null) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
             }
 
             // userName in AuthToken MUST match associatedUsername in Event
-            if(!returnedEvent.getAssociatedUsername().equals(authToken.getUserName())) {
+            if(!returnedEvent.getAssociatedUsername().equals(returnedAuthToken.getUserName())) {
                 db.closeConnection();
                 return new EventResult(ApiResult.REQUESTED_EVENT_NO_RELATION, "AuthToken userName: " +
-                        authToken.getUserName() + " Event associatedUsername: " + returnedEvent.getAssociatedUsername());
+                        returnedAuthToken.getUserName() + " Event associatedUsername: " + returnedEvent.getAssociatedUsername());
             }
 
             // Close db connection and return
@@ -71,19 +77,21 @@ public class EventService {
     /**
      * Implements the <code>/event</code> API route.
      *
-     * @param token AuthToken needed for the request
+     * @param authToken AuthToken needed for the request
      *
      * @return Returns ALL events for ALL family members of the current user. The current
-     * user is determined from the provided auth token
+     * user is determined from the provided auth authToken
      */
-    public EventResult getAllEvents(String token) {
+    public EventResult getAllEvents(String authToken) {
         try {
             // Set up DB
             Database db = new Database();
             db.loadDriver();
             db.openConnection();
+            db.initializeTables();
+            db.commitConnection(true);
 
-            if(token == null) {
+            if(authToken == null) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "Token is null");
             }
@@ -95,36 +103,36 @@ public class EventService {
             eventDao.setConnection(db.getConnection());
             authTokenDao.setConnection(db.getConnection());
 
-            AuthToken authToken = authTokenDao.getAuthTokenByToken(token);
-            if(authToken == null) {
+            AuthToken returnedAuthToken = authTokenDao.getAuthTokenByToken(authToken);
+            if(returnedAuthToken == null) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken is null and not found in database.");
             }
-            if(authToken.getUserName() == null) {
+            if(returnedAuthToken.getUserName() == null) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
             }
 
             // Make sure that the authToken belongs to the provided userName
-            AuthToken authTokenForCheck = authTokenDao.getAuthTokenByUserName(authToken.getUserName());
+            AuthToken authTokenForCheck = authTokenDao.getAuthTokenByUserName(returnedAuthToken.getUserName());
 
             if(authTokenForCheck == null) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN,
-                        "token of provided authToken does not exist in database.");
+                        "authToken of provided authToken does not exist in database.");
             }
 
             String tokenFromResponse = authTokenForCheck.getToken();
-            String tokenFromParameter = authToken.getToken();
+            String tokenFromParameter = returnedAuthToken.getToken();
 
             if(!tokenFromParameter.equals(tokenFromResponse)) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN,
-                        "token of provided authToken does not match token with provided userName");
+                        "authToken of provided authToken does not match authToken with provided userName");
             }
 
             // Create eventDao thing where you get all Events
-            Event[] allEvents = eventDao.getAllEvents();
+            Event[] allEvents = eventDao.getAllEvents(returnedAuthToken.getUserName());
 
             // Close db connection and return
             db.closeConnection();

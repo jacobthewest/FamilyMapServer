@@ -15,17 +15,17 @@ public class AuthTokenDao {
     private final String EMPTY_SQL = "DELETE FROM AuthToken";
     private final String CREATE_SQL = "CREATE TABLE IF NOT EXISTS AuthToken " +
             "(" +
-            "token TEXT NOT NULL, " +
+            "authToken TEXT NOT NULL, " +
             "userName TEXT NOT NULL," +
-            "PRIMARY KEY(token)" +
+            "PRIMARY KEY(authToken)" +
             ");";
     private final String INSERT = "INSERT INTO AuthToken " +
-            "(token, userName) " +
+            "(authToken, userName) " +
             "VALUES (?,?);";
     private final String DELETE_SQL = "DELETE FROM AuthToken" +
-            "WHERE token = ?;";
-    private final String SELECT_BY_TOKEN = "SELECT userName FROM AuthToken WHERE token = ?";
-    private final String SELECT_BY_USER_NAME = "SELECT token FROM AuthToken WHERE userName = ?";
+            "WHERE authToken = ?;";
+    private final String SELECT_BY_TOKEN = "SELECT userName FROM AuthToken WHERE authToken = ?";
+    private final String SELECT_BY_USER_NAME = "SELECT authToken FROM AuthToken WHERE userName = ?";
 
     /**
      * Creates an AuthToken database access object to access SQL Database
@@ -95,14 +95,14 @@ public class AuthTokenDao {
 
     /**
      * Deletes an AuthToken object from the database if it exists in it
-     * @param token String identifier used to identify the AuthToken to delete
+     * @param authToken String identifier used to identify the AuthToken to delete
      * @throws DatabaseException Error with database operation
      */
-    public void deleteAuthToken(String token) throws DatabaseException {
+    public void deleteAuthToken(String authToken) throws DatabaseException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(DELETE_SQL);
-            stmt.setString(1, token);
+            stmt.setString(1, authToken);
             if (stmt.executeUpdate() != 1) {
                 throw new DatabaseException("Error with deleting AuthToken object into database");
             }
@@ -172,17 +172,17 @@ public class AuthTokenDao {
 
     /**
      * Returns a User from the database if it exist in it based off the User's AuthToken
-     * @param token String identifier unique to the AuthToken object to retrieve
+     * @param authToken String identifier unique to the AuthToken object to retrieve
      * @return A User object from the query
      * @throws DatabaseException Error with database operation
      */
-    public User getUser(String token) throws DatabaseException {
+    public User getUser(String authToken) throws DatabaseException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         User user = null;
         try {
             stmt = connection.prepareStatement(SELECT_BY_TOKEN);
-            stmt.setString(1, token);
+            stmt.setString(1, authToken);
             rs = stmt.executeQuery();
             stmt.close();
 
@@ -210,16 +210,16 @@ public class AuthTokenDao {
     public AuthToken getAuthTokenByUserName(String userName) throws DatabaseException{
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        AuthToken authToken = null;
+        AuthToken returnedAuthToken = null;
         try {
             stmt = connection.prepareStatement(SELECT_BY_USER_NAME);
             stmt.setString(1, userName);
             rs = stmt.executeQuery();
 
-            String token = null;
+            String authToken = null;
             while (rs.next()) {
-                token = rs.getString(1);
-                authToken = new AuthToken(token, userName);
+                authToken = rs.getString(1);
+                returnedAuthToken = new AuthToken(authToken, userName);
             }
             if(rs != null) rs.close();
             if(stmt != null) stmt.close();
@@ -227,28 +227,28 @@ public class AuthTokenDao {
         catch (Exception e) {
             throw new DatabaseException("SQLException when selecting AuthToken object: " + e);
         }
-        return authToken;
+        return returnedAuthToken;
     }
 
     /**
      * Returns a User from the database if it exist in it based off the User's userName
-     * @param token String identifier unique to the AuthToken object to retrieve
+     * @param authToken String identifier unique to the AuthToken object to retrieve
      * @return A User object from the query
      * @throws DatabaseException Error with database operation
      */
-    public AuthToken getAuthTokenByToken(String token) throws DatabaseException{
+    public AuthToken getAuthTokenByToken(String authToken) throws DatabaseException{
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        AuthToken authToken = null;
+        AuthToken returnedAuthToken = null;
         try {
             stmt = connection.prepareStatement(SELECT_BY_TOKEN);
-            stmt.setString(1, token);
+            stmt.setString(1, authToken);
             rs = stmt.executeQuery();
 
             String userName = null;
             while (rs.next()) {
                 userName = rs.getString(1);
-                authToken = new AuthToken(token, userName);
+                returnedAuthToken = new AuthToken(authToken, userName);
             }
             if(rs != null) rs.close();
             if(stmt != null) stmt.close();
@@ -256,7 +256,7 @@ public class AuthTokenDao {
         catch (Exception e) {
             throw new DatabaseException("SQLException when selecting AuthToken object: " + e);
         }
-        return authToken;
+        return returnedAuthToken;
     }
 
     /**

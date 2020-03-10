@@ -198,7 +198,7 @@ public class PersonServiceTest {
      * Sets the authToken member variable
      */
     private void setAuthToken() {
-        authToken = new AuthToken("token", person.getAssociatedUsername());
+        authToken = new AuthToken("authToken", person.getAssociatedUsername());
     }
 
     /**

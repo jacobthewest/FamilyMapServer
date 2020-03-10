@@ -11,13 +11,15 @@ import result.ApiResult;
 import result.RegisterResult;
 import request.RegisterRequest;
 
+import java.util.UUID;
+
 /**
  * Contains functions used to register a new user. Implements the api route <code>/user/register</code>
  */
 public class RegisterService {
     /**
      * Creates a new user account, generates 4 generations of ancestor data for the new
-     * user, logs the user in, and returns an auth token.
+     * user, logs the user in, and returns an auth authToken.
      *
      * @param request A RegisterService object containing data needed to serve the API call
      * @return The result of registering the user
@@ -37,6 +39,8 @@ public class RegisterService {
              Database db = new Database();
              db.loadDriver();
              db.openConnection();
+             db.initializeTables();
+             db.commitConnection(true);
 
              // Create Daos
              UserDao userDao = new UserDao();
@@ -55,20 +59,32 @@ public class RegisterService {
                  //---------- The following will now take place ----------//
 
                  // 1) Create a new user account
+                 if(userFromRequest.getPersonID() == null) {
+                     userFromRequest.setPersonID(UUID.randomUUID().toString());
+                 }
                     userDao.insertUser(userFromRequest);
+                    db.commitConnection(true);
+                    db.closeConnection();
 
                  // 2) Generates 4 generations of ancestor data for the new user
                     FillService fillService = new FillService();
                     fillService.fill(userFromRequest.getUserName());
 
                  // 3) Log the user in
+                    db.loadDriver();
+                    db.openConnection();
+                    authTokenDao.setConnection(db.getConnection());
+
                     AuthToken authToken = new AuthToken(userFromRequest.getUserName());
                     authTokenDao.insertAuthToken(authToken);
-                    LoginRequest loginRequest = new LoginRequest(userFromRequest.getUserName(), userFromRequest.getPassWord());
+                    db.commitConnection(true);
+                    db.closeConnection();
+
+                    LoginRequest loginRequest = new LoginRequest(userFromRequest.getUserName(), userFromRequest.getPassword());
                     LoginService loginService = new LoginService();
                     loginService.login(loginRequest);
 
-                 // 4) Close db and return an auth token.
+                 // 4) Close db and return an auth authToken.
                     db.closeConnection();
                     return new RegisterResult(authToken.getToken(), authToken.getUserName(), userFromRequest.getPersonID());
              } else {

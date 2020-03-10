@@ -90,6 +90,31 @@ public class EventDao {
     }
 
     /**
+     * Gets a count of all Users in the User table
+     * @return The number of Users in the User table
+     */
+    public int getCountOfAllEvents(String associatedUsername) throws DatabaseException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+        try {
+            stmt = connection.prepareStatement("SELECT * FROM Event WHERE associatedUsername = ?");
+            stmt.setString(1, associatedUsername);
+            stmt.executeQuery();
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                count++;
+            }
+            stmt.close();
+            rs.close();
+            return count;
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when getting count of Event table: " + e);
+        }
+    }
+
+    /**
      * Creates an Event table in the database if it doesn't already exist
      * @throws DatabaseException Error with database operation
      */
@@ -302,14 +327,15 @@ public class EventDao {
      * @return An Array of all Events
      * @throws DatabaseException An Error performing the operation.
      */
-    public Event[] getAllEvents() throws DatabaseException {
+    public Event[] getAllEvents(String associatedUsername) throws DatabaseException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        int numberOfEvents = getCountOfAllEvents();
+        int numberOfEvents = getCountOfAllEvents(associatedUsername);
         Event[] data = new Event[numberOfEvents];
 
         try {
-            stmt = connection.prepareStatement("SELECT * FROM Event");
+            stmt = connection.prepareStatement("SELECT * FROM Event WHERE associatedUsername = ?");
+            stmt.setString(1, associatedUsername);
             rs = stmt.executeQuery();
             int arrayCounter = 0;
 

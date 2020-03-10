@@ -6,7 +6,7 @@ package model;
  */
 public class User {
     private String userName;
-    private String passWord;
+    private String password;
     private String email;
     private String firstName;
     private String lastName;
@@ -17,7 +17,7 @@ public class User {
      * Creates a user
      *
      * @param userName Unique user name (non-empty string)
-     * @param passWord User’s password (non-empty string)
+     * @param password User’s password (non-empty string)
      * @param email User’s email address (non-empty string)
      * @param firstName User’s first name (non-empty string)
      * @param lastName User’s last name (non-empty string)
@@ -26,10 +26,10 @@ public class User {
      *                 Person object - see Family History Information section
      *                 for details (non-empty string)
      */
-    public User(String userName, String passWord, String email, String firstName,
+    public User(String userName, String password, String email, String firstName,
                 String lastName, String gender, String personID) {
         setUserName(userName);
-        setPassWord(passWord);
+        setPassWord(password);
         setEmail(email);
         setFirstName(firstName);
         setLastName(lastName);
@@ -41,19 +41,19 @@ public class User {
      * Creates a user
      *
      * @param userName  Unique user name (non-empty string)
-     * @param passWord  User’s password (non-empty string)
+     * @param password  User’s password (non-empty string)
      */
-    public User(String userName, String passWord) {
+    public User(String userName, String password) {
         setUserName(userName);
-        setPassWord(passWord);
+        setPassWord(password);
     }
 
     public String getUserName() {
         return userName;
     }
 
-    public String getPassWord() {
-        return passWord;
+    public String getPassword() {
+        return password;
     }
 
     public String getEmail() {
@@ -81,8 +81,8 @@ public class User {
         this.userName = userName;
     }
 
-    public void setPassWord(String passWord) {
-        this.passWord = passWord;
+    public void setPassWord(String password) {
+        this.password = password;
     }
 
     public void setEmail(String email) {

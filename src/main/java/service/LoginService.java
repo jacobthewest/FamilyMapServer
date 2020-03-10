@@ -10,12 +10,14 @@ import result.ApiResult;
 import result.LoginResult;
 import request.LoginRequest;
 
+import java.util.UUID;
+
 /**
  * A class used to log a user into the server and serve the API route <code>user/login</code>.
  */
 public class LoginService {
     /**
-     * Logs in the user and returns an auth token.
+     * Logs in the user and returns an auth authToken.
      *
      * @param request An instance of LoginRequest with userName and password to login
      * @return An AuthToken needed to maintain the User's login status
@@ -39,10 +41,14 @@ public class LoginService {
             Database db = new Database();
             db.loadDriver();
             db.openConnection();
+            db.initializeTables();
+            db.commitConnection(true);
 
             // Create and open User a UserDao
             UserDao userDao = new UserDao();
+            AuthTokenDao authTokenDao = new AuthTokenDao();
             userDao.setConnection(db.getConnection());
+            authTokenDao.setConnection(db.getConnection());
 
             // Get specified User from the database
             User userToVerify = userDao.getUserByUserName(userName);
@@ -53,21 +59,28 @@ public class LoginService {
             }
 
             // Verify if the User's password from the database matches the password from the request
-            if(!userToVerify.getPassWord().equals(password)) {
+//            if(userToVerify.getPassword() == null) {
+//                db.closeConnection();
+//                return new LoginResult(ApiResult.REQUEST_PROPERTY_MISSING_OR_INVALID,
+//                        "Provided password does not match password found in database.");
+//            }
+            if(!userToVerify.getPassword().equals(password)) {
                 db.closeConnection();
                 return new LoginResult(ApiResult.REQUEST_PROPERTY_MISSING_OR_INVALID,
                         "Provided password does not match password found in database.");
-            } else {
-                // The passwords match! Now we need to retrieve the user's authToken
-                AuthTokenDao authTokenDao = new AuthTokenDao();
-                authTokenDao.setConnection(db.getConnection());
-                AuthToken authToken = authTokenDao.getAuthTokenByUserName(userName);
-
-                // Create successful login
-                // Close db connection and return
-                db.closeConnection();
-                return new LoginResult(authToken.getToken(), userName, userToVerify.getPersonID());
             }
+            // The passwords match! Now we need to retrieve the user's authToken
+
+            // Generate and insert new authToken for the user
+            AuthToken newAuthToken = new AuthToken(UUID.randomUUID().toString(),userToVerify.getUserName());
+            authTokenDao.insertAuthToken(newAuthToken);
+            db.commitConnection(true);
+            AuthToken authToken = authTokenDao.getAuthTokenByUserName(userName);
+
+            // Create successful login
+            // Close db connection and return
+            db.closeConnection();
+            return new LoginResult(authToken.getToken(), userName, userToVerify.getPersonID());
         } catch(DatabaseException e) {
             return new LoginResult(ApiResult.INTERNAL_SERVER_ERROR, e.getMessage());
         }

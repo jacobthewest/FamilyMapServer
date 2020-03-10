@@ -21,13 +21,13 @@ public class PersonService {
      * @param personID A String identifier for the Person to get from the database
      * @return The single Person object with the specified ID.
      */
-    public PersonResult getPerson(String personID, String token) {
+    public PersonResult getPerson(String personID, String authToken) {
         // Error check the parameters
         if(personID == null) {
             return new PersonResult(ApiResult.INVALID_PERSON_ID_PARAM,"personID is null");
         }
-        if(token == null) {
-            return new PersonResult(ApiResult.INVALID_AUTH_TOKEN, "token is null");
+        if(authToken == null) {
+            return new PersonResult(ApiResult.INVALID_AUTH_TOKEN, "authToken is null");
         }
 
         try {
@@ -35,6 +35,8 @@ public class PersonService {
             Database db = new Database();
             db.loadDriver();
             db.openConnection();
+            db.initializeTables();
+            db.commitConnection(true);
 
             // Create Daos
             PersonDao personDao = new PersonDao();
@@ -43,9 +45,12 @@ public class PersonService {
             personDao.setConnection(db.getConnection());
             authTokenDao.setConnection(db.getConnection());
 
-            AuthToken authToken = authTokenDao.getAuthTokenByToken(token);
+            AuthToken returnedAuthToken = authTokenDao.getAuthTokenByToken(authToken);
             // Error check authToken
-            if(authToken.getToken() == null) {
+            if(returnedAuthToken == null) {
+                return new PersonResult(ApiResult.INVALID_AUTH_TOKEN, "authToken is null");
+            }
+            if(returnedAuthToken.getToken() == null) {
                 return new PersonResult(ApiResult.INVALID_AUTH_TOKEN, "authToken is null");
             }
 
@@ -62,7 +67,7 @@ public class PersonService {
 
             String userNameToCheck = retrievedPerson.getAssociatedUsername();
             AuthToken authTokenToCheck = authTokenDao.getAuthTokenByUserName(userNameToCheck);
-            if(!authTokenToCheck.getToken().equals(authToken.getToken())) {
+            if(!authTokenToCheck.getToken().equals(returnedAuthToken.getToken())) {
                 db.closeConnection();
                 return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
                         "AuthToken provided does not belong to the provided userName.");
@@ -85,9 +90,9 @@ public class PersonService {
     /**
      * @return Returns All Persons in the database
      */
-    public PersonResult getAllPersons(String token) {
-        // Error check token
-        if(token == null) {return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
+    public PersonResult getAllPersons(String authToken) {
+        // Error check authToken
+        if(authToken == null) {return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
                 "authToken object is null");}
 
         try {
@@ -95,6 +100,8 @@ public class PersonService {
             Database db = new Database();
             db.loadDriver();
             db.openConnection();
+            db.initializeTables();
+            db.commitConnection(true);
 
             // Create PersonDao
             PersonDao personDao = new PersonDao();
@@ -102,33 +109,33 @@ public class PersonService {
             personDao.setConnection(db.getConnection());
             authTokenDao.setConnection(db.getConnection());
 
-            AuthToken authToken = authTokenDao.getAuthTokenByToken(token);
+            AuthToken returnedAuthToken = authTokenDao.getAuthTokenByToken(authToken);
 
-            if(authToken == null) {
+            if(returnedAuthToken == null) {
                 db.closeConnection();
                 return new PersonResult(ApiResult.INVALID_AUTH_TOKEN, "authToken is not found in database");
             }
 
             // Error check the authToken
-            if(authToken.getToken() == null) {
+            if(returnedAuthToken.getToken() == null) {
                 db.closeConnection();
                 return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
-                    "token is null");}
-            if(authToken.getUserName() == null) {
+                    "authToken is null");}
+            if(returnedAuthToken.getUserName() == null) {
                 db.closeConnection();
                 return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
                     "userName is null");}
             // Do the authToken and userName match?
             boolean match = false;
-            match = authTokenAgreesWithSelf(authToken);
+            match = authTokenAgreesWithSelf(returnedAuthToken);
             if(!match) {
                 db.closeConnection();
                 return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
-                        "userName and token don't match each other in the database.");
+                        "userName and authToken don't match each other in the database.");
             }
 
             // Retrieve Person array from PersonDao
-            Person[] personArray = personDao.getAllPersons(authToken.getUserName());
+            Person[] personArray = personDao.getAllPersons(returnedAuthToken.getUserName());
 
             // Error check Person array from PersonDao
             if(personArray == null) {
@@ -151,6 +158,8 @@ public class PersonService {
             Database db = new Database();
             db.loadDriver();
             db.openConnection();
+            db.initializeTables();
+            db.commitConnection(true);
             Connection connection = db.getConnection();
 
             // Set up AuthTokenDao

@@ -5,7 +5,7 @@ package result;
  * <code>/load</code> API route
  */
 public class LoginResult extends ApiResult {
-    private String token;
+    private String authToken;
     private String userName;
     private String personID;
     private String message;
@@ -30,21 +30,21 @@ public class LoginResult extends ApiResult {
 
     /**
      * Creates an ApiResult of a successful request to the <code>/user/login</code> route.
-     * @param token String token from LoginRequest
+     * @param authToken String authToken from LoginRequest
      * @param userName String userName from LoginRequest
      * @param personID String personID from LoginRequest
      */
-    public LoginResult(String token, String userName, String personID) {
+    public LoginResult(String authToken, String userName, String personID) {
         setSuccess(true);
         setMessage(null);
         setDescription(null);
-        setToken(token);
+        setToken(authToken);
         setUserName(userName);
         setPersonID(personID);
     }
 
     public String getToken() {
-        return token;
+        return authToken;
     }
 
     public String getUserName() {
@@ -57,8 +57,8 @@ public class LoginResult extends ApiResult {
 
     public boolean getSuccess() {return this.success;}
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setToken(String authToken) {
+        this.authToken = authToken;
     }
 
     public void setUserName(String userName) {

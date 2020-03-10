@@ -71,7 +71,7 @@ public class RegisterServiceTest {
      */
     @Test
     public void registerPass() {
-        newUser = new User("newUser","passWord","email@email.com",
+        newUser = new User("newUser","password","email@email.com",
                 "firstName","lastName","m","personID");
 
         RegisterRequest registerRequest = new RegisterRequest(newUser);
@@ -88,7 +88,7 @@ public class RegisterServiceTest {
      */
     @Test
     public void registerFail() {
-        newUser = new User("newUser","passWord","email@email.com",
+        newUser = new User("newUser","password","email@email.com",
                 "firstName","lastName","m","personID");
         userWithExistingUserName = new User("newUser","newPassWord","newEmail@email.com",
                 "newFirstName","newLastName","f","newPersonID");

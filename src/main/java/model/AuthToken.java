@@ -7,25 +7,25 @@ import java.util.UUID;
  * One user may have multiple AuthTokens.
  */
 public class AuthToken {
-    private String token;
+    private String authToken;
     private String userName;
 
     /**
      * Creates a new AuthToken.
      *
-     * @param token The token to authenticate the user
-     * @param userName The username of the user who holds the token
+     * @param authToken The authToken to authenticate the user
+     * @param userName The username of the user who holds the authToken
      */
-    public AuthToken(String token, String userName) {
-        this.token = token;
+    public AuthToken(String authToken, String userName) {
+        this.authToken = authToken;
         this.userName = userName;
     }
 
     /**
-     * Generates a unique token and makes a new AuthToken
+     * Generates a unique authToken and makes a new AuthToken
      *
      * @param userName The userName of the person who is getting the
-     *                 auto-generated token
+     *                 auto-generated authToken
      */
     public AuthToken(String userName){
         setUserName(userName);
@@ -37,14 +37,14 @@ public class AuthToken {
     }
 
     public String getToken() {
-        return token;
+        return authToken;
     }
 
     public void setUserName(String userName) {
         this.userName = userName;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setToken(String authToken) {
+        this.authToken = authToken;
     }
 }

@@ -35,6 +35,8 @@ public class LoadService {
             Database db = new Database();
             db.loadDriver();
             db.openConnection();
+            db.initializeTables();
+            db.commitConnection(true);
 
             // Retrieve data from request
             Event[] events = request.getEvents();
@@ -49,10 +51,6 @@ public class LoadService {
             eventDao.setConnection(db.getConnection());
             personDao.setConnection(db.getConnection());
             userDao.setConnection(db.getConnection());
-
-            // Clear all data from user person and event tables
-            db.emptyTables();
-            db.commitConnection(true);
 
             // Make sure the clear worked
             if(eventDao.getCountOfAllEvents() != 0) {
@@ -69,6 +67,9 @@ public class LoadService {
             for(Event singleEvent: events) {eventDao.insertEvent(singleEvent);}
             for(Person singlePerson: persons) {personDao.insertPerson(singlePerson);}
             for(User singleUser: users) {userDao.insertUser(singleUser);}
+
+            // Commit the inserted objects to the database
+            db.commitConnection(true);
 
             // Get the number of added objects
             int numEventsAdded = eventDao.getCountOfAllEvents();

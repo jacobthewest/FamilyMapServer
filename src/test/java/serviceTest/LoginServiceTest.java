@@ -73,7 +73,7 @@ public class LoginServiceTest {
     }
 
     /**
-     * Tests logging in with a valid userName and passWord
+     * Tests logging in with a valid userName and password
      */
     @Test
     public void loginPass() {
@@ -81,14 +81,14 @@ public class LoginServiceTest {
         insertUser();
         insertAuthToken(); // AuthToken associated with the user
 
-        LoginRequest loginRequest = new LoginRequest(user.getUserName(), user.getPassWord());
+        LoginRequest loginRequest = new LoginRequest(user.getUserName(), user.getPassword());
         loginService = new LoginService();
         LoginResult loginResult = loginService.login(loginRequest);
 
-        String token = getToken();
+        String authToken = getToken();
 
         assertTrue(loginResult.getSuccess());
-        assertEquals(token, loginResult.getToken());
+        assertEquals(authToken, loginResult.getToken());
         assertEquals(user.getPersonID(), loginResult.getPersonID());
         assertEquals(user.getUserName(), loginResult.getUserName());
     }
@@ -103,7 +103,7 @@ public class LoginServiceTest {
         user.setPassWord("badPassWord");
         insertAuthToken();
 
-        LoginRequest loginRequest = new LoginRequest(user.getUserName(), user.getPassWord());
+        LoginRequest loginRequest = new LoginRequest(user.getUserName(), user.getPassword());
         loginService = new LoginService();
         LoginResult loginResult = loginService.login(loginRequest);
 
@@ -115,7 +115,7 @@ public class LoginServiceTest {
      * Sets the user member variable
      */
     private void setUser() {
-        user = new User("userName","passWord",
+        user = new User("userName","password",
                 "email@email.com","firstName","lastName",
                 "m","personID");
     }
@@ -137,7 +137,7 @@ public class LoginServiceTest {
      */
     private void insertAuthToken() {
         try {
-            authToken = new AuthToken("token", user.getUserName());
+            authToken = new AuthToken("authToken", user.getUserName());
             authTokenDao.insertAuthToken(authToken);
             db.commitConnection(true);
         } catch(DatabaseException ex) {
