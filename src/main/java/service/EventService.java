@@ -44,6 +44,10 @@ public class EventService {
             Event returnedEvent = eventDao.getEventByEventID(eventID);
 
             AuthToken authToken = authTokenDao.getAuthTokenByToken(token);
+            if(authToken == null) {
+                db.closeConnection();
+                return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken is null and not found in database.");
+            }
             if(authToken.getUserName() == null) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");
@@ -91,7 +95,11 @@ public class EventService {
             eventDao.setConnection(db.getConnection());
             authTokenDao.setConnection(db.getConnection());
 
-            AuthToken authToken = authTokenDao.getAuthTokenByUserName(token);
+            AuthToken authToken = authTokenDao.getAuthTokenByToken(token);
+            if(authToken == null) {
+                db.closeConnection();
+                return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken is null and not found in database.");
+            }
             if(authToken.getUserName() == null) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN, "AuthToken userName is null");

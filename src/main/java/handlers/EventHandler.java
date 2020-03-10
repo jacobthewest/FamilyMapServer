@@ -1,5 +1,6 @@
 package handlers;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import result.EventResult;
@@ -43,24 +44,23 @@ public class EventHandler implements HttpHandler {
             errorFree = false;
         }
 
-        // Check for invalid URL path
-        String url = httpExchange.getRequestURI().toString();
-        if(!isValidURL(httpExchange)) {
-            // Invalid URL
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
-            eventResult.setSuccess(false);
-            eventResult.setMessage("Http 400, Bad Request");
-            eventResult.setDescription("Invalid URL. URL should be '/event' or '/event/[eventID]'");
-            errorFree = false;
-        }
-
         // Check for invalid AuthToken
-        if(!isValidAuthToken(httpExchange)) {
-            // Invalid AuthToken
+        Headers stuff = httpExchange.getRequestHeaders(); // The h*ck!!!
+        if(httpExchange.getRequestHeaders().containsKey(AUTHORIZATION)) {
+            if(!isValidAuthToken(httpExchange)) {
+                // Invalid AuthToken
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+                eventResult.setSuccess(false);
+                eventResult.setMessage("Http 400, Bad Request");
+                eventResult.setDescription("Invalid URL. URL should be '/event' or '/event/[eventID]'");
+                errorFree = false;
+            }
+        } else {
+            // Invalid HTTP Method
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
             eventResult.setSuccess(false);
             eventResult.setMessage("Http 400, Bad Request");
-            eventResult.setDescription("Invalid URL. URL should be '/event' or '/event/[eventID]'");
+            eventResult.setDescription("No Authorization in request header.");
             errorFree = false;
         }
 
@@ -68,7 +68,7 @@ public class EventHandler implements HttpHandler {
         if(errorFree) {
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
             int urlLength = getUrlLength(httpExchange);
-            String token = getToken(httpExchange);
+            String token = httpExchange.getRequestHeaders().getFirst(AUTHORIZATION);
             if(urlLength == 1) {
                 eventResult = eventService.getAllEvents(token);
             } else if (urlLength == 2) {
@@ -115,29 +115,12 @@ public class EventHandler implements HttpHandler {
     }
 
     /**
-     * Checks for a valid URL
-     * @param httpExchange Http Exchange object
-     * @return If the url is valid
-     */
-    private boolean isValidURL(HttpExchange httpExchange) {
-        String url = httpExchange.getRequestURI().toString();
-        String[] urlParts = url.split("/");
-        if(urlParts.length != 1 && urlParts.length != 2) {
-            return false;
-        }
-
-        if(!url.contains("/event/") && (url.length() == 2)) return false;
-        if(!url.contains("/event") && (url.length() != 1)) return false;
-        return true;
-    }
-
-    /**
      * Checks for a valid authToken
      * @param httpExchange Http Exchange object
      * @return If the authToken is valid
      */
     private boolean isValidAuthToken(HttpExchange httpExchange) {
-        String token = getToken(httpExchange);
+        String token = httpExchange.getRequestHeaders().getFirst(AUTHORIZATION);
         if(token.equals(null)) {
             return false;
         } return true;
@@ -163,15 +146,7 @@ public class EventHandler implements HttpHandler {
         return false;
     }
 
-    private String getToken(HttpExchange exchange) {
-        try {
-            String authToken = exchange.getRequestHeaders().getFirst(AUTHORIZATION);
-            return authToken;
-        } catch (Exception e) {
-            System.err.println("EventHandler found invalid AuthToken in request");
-            return null;
-        }
-    }
+
 
     private String getEventID(HttpExchange httpExchange) {
         String url = httpExchange.getRequestURI().toString();

@@ -178,7 +178,7 @@ public class PersonDao {
             }
 
             stmt = connection.prepareStatement(EMPTY_SQL);
-            if (stmt.executeUpdate() != 1) {
+            if (stmt.executeUpdate() < 1) {
                 throw new DatabaseException("Error with emptying Person table");
             }
             stmt.close();

@@ -208,7 +208,7 @@ public class UserDao {
             }
 
             stmt = connection.prepareStatement(EMPTY_SQL);
-            if (stmt.executeUpdate() != 1) {
+            if (stmt.executeUpdate() < 1) {
                 throw new DatabaseException("Error with emptying User table");
             }
             stmt.close();

@@ -118,7 +118,7 @@ public class EventResult extends ApiResult {
         return year;
     }
 
-    public boolean getSuccess() {return getSuccess();}
+    public boolean getSuccess() {return this.success;}
 
     public void setData(Event[] data) {
         this.data = data;

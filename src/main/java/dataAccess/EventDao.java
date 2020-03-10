@@ -259,7 +259,7 @@ public class EventDao {
             }
 
             stmt = connection.prepareStatement(EMPTY_SQL);
-            if (stmt.executeUpdate() != 1) {
+            if (stmt.executeUpdate() < 1) {
                 throw new DatabaseException("Error with emptying Event table");
             }
             stmt.close();

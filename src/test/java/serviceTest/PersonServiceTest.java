@@ -37,6 +37,7 @@ public class PersonServiceTest {
             db.loadDriver();
             db.openConnection();
             db.initializeTables();
+            db.commitConnection(true);
             db.emptyTables();
             db.commitConnection(true);
             connection = db.getConnection();
@@ -59,7 +60,7 @@ public class PersonServiceTest {
         setAuthToken();
         insertAuthToken();
 
-        PersonResult personResult = personService.getPerson(person.getPersonID(), authToken);
+        PersonResult personResult = personService.getPerson(person.getPersonID(), authToken.getToken());
         Person tempPerson = personResult.getPerson();
 
         assertTrue(personResult.getSuccess());
@@ -77,7 +78,7 @@ public class PersonServiceTest {
         setAuthToken();
         insertAuthToken();
 
-        PersonResult personResult = personService.getPerson("badPersonID", authToken);
+        PersonResult personResult = personService.getPerson("badPersonID", authToken.getToken());
         Person tempPerson = personResult.getPerson();
 
         assertFalse(personResult.getSuccess());
@@ -94,7 +95,7 @@ public class PersonServiceTest {
         setAuthToken();
         insertAuthToken();
 
-        PersonResult personResult = personService.getAllPersons(authToken);
+        PersonResult personResult = personService.getAllPersons(authToken.getToken());
         Person[] personArray = personResult.getData();
 
         for(int i = 0; i < personArray.length; i++) {
@@ -115,7 +116,7 @@ public class PersonServiceTest {
 
         AuthToken badAuthToken = new AuthToken("buff", "useName");
 
-        PersonResult personResult = personService.getAllPersons(badAuthToken);
+        PersonResult personResult = personService.getAllPersons(badAuthToken.getToken());
         Person[] personArray = personResult.getData();
 
         boolean codeWorked = false;
@@ -151,7 +152,7 @@ public class PersonServiceTest {
         }
     }
 
-    /**
+    /**f
      * Sets the person member variable
      */
     private void setPerson() {

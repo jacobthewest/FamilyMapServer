@@ -41,17 +41,6 @@ public class ClearHandler implements HttpHandler {
             errorFree = false;
         }
 
-        // Check for invalid URL path
-        String url = httpExchange.getRequestURI().toString();
-        if(!url.toLowerCase().equals(URL)) {
-            // Invalid URL
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, RESPONSE_LENGTH);
-            clearResult.setSuccess(false);
-            clearResult.setMessage("Http 400, Bad Request");
-            clearResult.setDescription("Invalid URL. URL should be " + URL);
-            errorFree = false;
-        }
-
         // Valid Request. Send the HTTP OK
         if(errorFree) {
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);

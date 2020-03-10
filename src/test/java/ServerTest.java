@@ -8,7 +8,7 @@ public class ServerTest {
         boolean codeWorked = true;
         try {
             Server server = new Server();
-            String[] args = new String[]{"8000"};
+            String[] args = new String[]{"8080"};
             server.main(args);
         } catch (Exception e) {
             codeWorked = false;

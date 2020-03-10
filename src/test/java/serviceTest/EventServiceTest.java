@@ -60,6 +60,8 @@ public class EventServiceTest {
 
             // Insert into database and commit them.
             eventDao.insertEvent(event);
+            eventDao.insertEvent(event2);
+            eventDao.insertEvent(event3);
             authTokenDao.insertAuthToken(authToken);
 
             // Commit
@@ -135,10 +137,10 @@ public class EventServiceTest {
      * Tests retrieving a single event with an invalid authToken
      */
     @Test
-    public void getSingleEventFail() {
+        public void getSingleEventFail() {
         boolean codeWorked = false;
 
-        authToken.setUserName("blahblah"); // A bad userName that won't be in the database
+        authToken.setToken("blahblah"); // A bad token that won't be in the database
         eventResult = eventService.getEvent(event.getEventID(), authToken.getToken());
         Event eventFromEventResult = eventResult.getEvent();
 
@@ -153,7 +155,7 @@ public class EventServiceTest {
     public void getAllEventFail() {
         boolean codeWorked = false;
 
-        authToken.setUserName("blahblah"); // A bad userName that won't be in the database
+        authToken.setToken("blahblah"); // A bad token that won't be in the database
         eventResult = eventService.getAllEvents(authToken.getToken());
         Event[] data = eventResult.getData();
 

@@ -104,15 +104,25 @@ public class PersonService {
 
             AuthToken authToken = authTokenDao.getAuthTokenByToken(token);
 
+            if(authToken == null) {
+                db.closeConnection();
+                return new PersonResult(ApiResult.INVALID_AUTH_TOKEN, "authToken is not found in database");
+            }
+
             // Error check the authToken
-            if(authToken.getToken() == null) {return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
+            if(authToken.getToken() == null) {
+                db.closeConnection();
+                return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
                     "token is null");}
-            if(authToken.getUserName() == null) {return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
+            if(authToken.getUserName() == null) {
+                db.closeConnection();
+                return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
                     "userName is null");}
             // Do the authToken and userName match?
             boolean match = false;
             match = authTokenAgreesWithSelf(authToken);
             if(!match) {
+                db.closeConnection();
                 return new PersonResult(ApiResult.INVALID_AUTH_TOKEN,
                         "userName and token don't match each other in the database.");
             }
@@ -122,6 +132,7 @@ public class PersonService {
 
             // Error check Person array from PersonDao
             if(personArray == null) {
+                db.closeConnection();
                 return new PersonResult(ApiResult.INVALID_AUTH_TOKEN, "Array of Persons returned from authToken is null.");
             }
 

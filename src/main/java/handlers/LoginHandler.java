@@ -42,17 +42,6 @@ public class LoginHandler implements HttpHandler {
             errorFree = false;
         }
 
-        // Check for invalid URL path
-        String url = httpExchange.getRequestURI().toString();
-        if(!isValidURL(httpExchange)) {
-            // Invalid URL
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
-            loginResult.setSuccess(false);
-            loginResult.setMessage("Http 400, Bad Request");
-            loginResult.setDescription("Invalid URL. URL should be '/fill/[username]' or '/fill/[username]/{generations}}'");
-            errorFree = false;
-        }
-
         // Valid Request. Send the HTTP OK
         if(errorFree) {
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
@@ -97,21 +86,6 @@ public class LoginHandler implements HttpHandler {
             outputStream.close();
             httpExchange.getResponseBody().close();
         }
-    }
-
-    /**
-     * Checks for a valid URL
-     * @param httpExchange Http Exchange object
-     * @return If the url is valid
-     */
-    private boolean isValidURL(HttpExchange httpExchange) {
-        String url = httpExchange.getRequestURI().toString();
-        String[] urlParts = url.split("/");
-        if(urlParts.length != 2) {
-            return false;
-        }
-        if(!url.contains(URL)) return false;
-        return true;
     }
 
     /**

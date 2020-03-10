@@ -54,7 +54,7 @@ public class RegisterResult extends ApiResult {
         return personID;
     }
 
-    public boolean getSuccess() {return getSuccess();}
+    public boolean getSuccess() {return this.success;}
 
     public void setToken(String token) {
         this.token = token;

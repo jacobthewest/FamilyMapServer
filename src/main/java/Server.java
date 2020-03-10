@@ -1,20 +1,20 @@
 import com.sun.net.httpserver.HttpServer;
 import dataAccess.Database;
 import dataAccess.DatabaseException;
-import handlers.DefaultHandler;
+import handlers.*;
 
 import java.net.InetSocketAddress;
 
 public class Server {
-    private final int NO_SUCCESS = 1;
-    private int PORT = 8000;
+    private static final int NO_SUCCESS = 1;
+    private static int PORT = 8080;
     private int BACKLOG = 10;
     private HttpServer server;
     private Database db;
 
-    public void main(String[] args) {
-        if (args.length != 1) System.exit(NO_SUCCESS);
-        PORT = Integer.parseInt(args[0]);
+    public static void main(String[] args) {
+//        if (args.length != 1) System.exit(NO_SUCCESS);
+//        PORT = Integer.parseInt(args[0]);
 
         try {
             (new Server()).run(); // Need to wrap in parens to avoid
@@ -62,10 +62,11 @@ public class Server {
     private void createHandlerContexts() {
         server.createContext("/", new DefaultHandler());
         server.createContext("/clear", new ClearHandler());
-        server.createContext("/fill", new DefaultHandler());
-        server.createContext("/load", new DefaultHandler());
-        server.createContext("/login", new DefaultHandler());
-        server.createContext("/person", new DefaultHandler());
-        server.createContext("/register", new DefaultHandler());
+        server.createContext("/fill", new FillHandler());
+        server.createContext("/load", new LoadHandler());
+        server.createContext("/event", new EventHandler());
+        server.createContext("/user/login", new LoginHandler());
+        server.createContext("/person", new PersonHandler());
+        server.createContext("/user/register", new RegisterHandler());
     }
 }

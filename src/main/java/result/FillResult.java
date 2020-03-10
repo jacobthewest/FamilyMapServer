@@ -40,7 +40,7 @@ public class FillResult extends ApiResult {
         setDescription(null);
     }
 
-    public boolean getSuccess() {return getSuccess();}
+    public boolean getSuccess() {return this.success;}
 
     public String getMessage() {
         return message;

@@ -43,26 +43,25 @@ public class PersonHandler implements HttpHandler {
             errorFree = false;
         }
 
-        // Check for invalid URL path
-        String url = httpExchange.getRequestURI().toString();
-        if(!isValidURL(httpExchange)) {
-            // Invalid URL
+        // Check for invalid AuthToken
+        if(httpExchange.getRequestHeaders().containsKey(AUTHORIZATION)) {
+            if(!isValidAuthToken(httpExchange)) {
+                // Invalid AuthToken
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+                personResult.setSuccess(false);
+                personResult.setMessage("Http 400, Bad Request");
+                personResult.setDescription("Invalid URL. URL should be '/event' or '/event/[eventID]'");
+                errorFree = false;
+            }
+        } else {
+            // Invalid HTTP Method
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
             personResult.setSuccess(false);
             personResult.setMessage("Http 400, Bad Request");
-            personResult.setDescription("Invalid URL. URL should be '/event' or '/event/[eventID]'");
+            personResult.setDescription("No Authorization in request header.");
             errorFree = false;
         }
 
-        // Check for invalid AuthToken
-        if(!isValidAuthToken(httpExchange)) {
-            // Invalid AuthToken
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
-            personResult.setSuccess(false);
-            personResult.setMessage("Http 400, Bad Request");
-            personResult.setDescription("Invalid URL. URL should be '/event' or '/event/[eventID]'");
-            errorFree = false;
-        }
 
         // Valid Request. Send the HTTP OK
         if(errorFree) {

@@ -53,5 +53,5 @@ public class ClearResult {
         setDescription(null);
     }
 
-    public boolean getSuccess() {return getSuccess();}
+    public boolean getSuccess() {return this.success;}
 }
