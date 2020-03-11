@@ -190,10 +190,10 @@ public class PersonDaoTest {
             insertSpouse();
 
             Person[] array = this.personDao.getAllPersons(this.genericPerson.getAssociatedUsername());
-//            assertPerson(this.genericPerson, array[0]); // Person
-            assertPerson(this.father, array[0]); // Father
-            assertPerson(this.mother, array[1]); // Mother
-            assertPerson(this.spouse, array[2]); // Spouse
+            assertPerson(this.genericPerson, array[0]); // Person
+            assertPerson(this.father, array[1]); // Father
+            assertPerson(this.mother, array[2]); // Mother
+            assertPerson(this.spouse, array[3]); // Spouse
 
             codeWorked = true;
         } catch(Exception e) {
@@ -216,14 +216,14 @@ public class PersonDaoTest {
             insertSpouse();
 
             Person[] array = this.personDao.getAllPersons(this.genericPerson.getAssociatedUsername());
-//            assertPerson(this.genericPerson, array[0]); // Person
-            assertPerson(this.father, array[0]); // Father
+            assertPerson(this.genericPerson, array[0]); // Person
+            //assertPerson(this.father, array[1]); // Father
             assertPerson(this.mother, array[1]); // Mother
             assertPerson(this.spouse, array[2]); // Spouse
 
-            codeWorked = false;
+            codeWorked = true; // Because the bad father object wasn't included.
         } catch(Exception e) {
-            codeWorked = true;
+            codeWorked = false;
         }
         assertTrue(codeWorked);
     }
@@ -235,28 +235,28 @@ public class PersonDaoTest {
     }
 
     public void insertFather() throws DatabaseException {
-        this.father = new Person("fatherID","fatherUsername", "daddy",
+        this.father = new Person("fatherID","associatedUsername", "daddy",
                 "pops", "m", null, null, null);
         personDao.insertPerson(father);
         db.commitConnection(true);
     }
 
     public void insertBadDad() throws DatabaseException {
-        this.father = new Person("nonExistentFatherPersonID","fatherUsername", "daddy",
+        this.father = new Person("nonExistentFatherPersonID","badUserName", "daddy",
                 "pops", "m", null, null, null);
         personDao.insertPerson(father);
         db.commitConnection(true);
     }
 
     public void insertMother() throws DatabaseException {
-        this.mother = new Person("motherID","motherUsername", "mommy",
+        this.mother = new Person("motherID","associatedUsername", "mommy",
                 "motherDearest", "f", null, null, null);
         personDao.insertPerson(mother);
         db.commitConnection(true);
     }
 
     public void insertSpouse() throws DatabaseException {
-        this.spouse = new Person("spouseID","spouseUsername", "hottie",
+        this.spouse = new Person("spouseID","associatedUsername", "hottie",
                 "wifey", "f", null, null, null);
         personDao.insertPerson(spouse);
         db.commitConnection(true);

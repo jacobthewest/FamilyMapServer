@@ -62,6 +62,11 @@ public class PersonService {
             String userNameFromAuthToken = returnedAuthToken.getUserName();
             // Get the associatedUserName from the personID
             Person returnedPerson = personDao.getPersonByPersonID(personID);
+            if(returnedPerson == null) {
+                db.closeConnection();
+                return new PersonResult(ApiResult.INVALID_AUTH_TOKEN); // returnedPerson is null
+            }
+
             String associatedUserNameFromPersonID = returnedPerson.getAssociatedUsername();
             // If they are NOT the same then throw an invalid auth token error
             if(!associatedUserNameFromPersonID.equals(userNameFromAuthToken)) {
