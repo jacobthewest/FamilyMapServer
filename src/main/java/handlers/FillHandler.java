@@ -2,6 +2,7 @@ package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import dataAccess.DatabaseException;
 import result.FillResult;
 import service.FillService;
 import util.ObjectEncoder;
@@ -146,10 +147,11 @@ public class FillHandler implements HttpHandler {
      * @param httpExchange An HttpExchange object
      * @return The length of the URL
      */
-    private int getUrlLength(HttpExchange httpExchange) {
+    private int
+    getUrlLength(HttpExchange httpExchange) {
         String url = httpExchange.getRequestURI().toString();
         String[] urlParts = url.split("/");
-        return urlParts.length;
+        return urlParts.length - 1;
     }
 
     /**
@@ -160,7 +162,7 @@ public class FillHandler implements HttpHandler {
     private String getUserName(HttpExchange httpExchange) {
         String url = httpExchange.getRequestURI().toString();
         String[] urlParts = url.split("/");
-        return urlParts[1];
+        return urlParts[2];
     }
 
     /**
@@ -171,6 +173,6 @@ public class FillHandler implements HttpHandler {
     private int getGenerations(HttpExchange httpExchange) {
         String url = httpExchange.getRequestURI().toString();
         String[] urlParts = url.split("/");
-        return Integer.parseInt(urlParts[2]);
+        return Integer.parseInt(urlParts[3]);
     }
 }

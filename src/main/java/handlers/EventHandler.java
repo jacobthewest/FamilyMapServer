@@ -45,7 +45,6 @@ public class EventHandler implements HttpHandler {
         }
 
         // Check for invalid AuthToken
-        Headers stuff = httpExchange.getRequestHeaders(); // The h*ck!!!
         if(httpExchange.getRequestHeaders().containsKey(AUTHORIZATION)) {
             if(!isValidAuthToken(httpExchange)) {
                 // Invalid AuthToken
@@ -156,7 +155,7 @@ public class EventHandler implements HttpHandler {
     private String getEventID(HttpExchange httpExchange) {
         String url = httpExchange.getRequestURI().toString();
         String[] urlParts = url.split("/");
-        return urlParts[1];
+        return urlParts[2];
     }
 
     /**

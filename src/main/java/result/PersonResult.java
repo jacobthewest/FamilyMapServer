@@ -16,19 +16,16 @@ public class PersonResult extends ApiResult {
     private String spouseID;
     private String message;
     private boolean success;
-    private String description;
     private Person[] data;
 
     /**
      * Creates an ApiResult of a failed request to the <code>/person/[personID]</code> and
      * <code>/person</code> routes.
      * @param error the error message
-     * @param description Explanation of the error message
      */
-    public PersonResult(String error, String description) {
+    public PersonResult(String error) {
         setSuccess(false);
         setMessage(error);
-        setDescription(description);
     }
 
     /**
@@ -42,7 +39,6 @@ public class PersonResult extends ApiResult {
     public PersonResult(Person[] data) {
         setSuccess(true);
         setMessage(null);
-        setDescription(null);
         setData(data);
     }
 
@@ -150,13 +146,6 @@ public class PersonResult extends ApiResult {
         this.message = message;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public boolean isSuccess() {
         return success;

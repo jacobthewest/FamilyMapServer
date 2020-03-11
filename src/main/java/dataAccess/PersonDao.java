@@ -2,10 +2,13 @@ package dataAccess;
 
 import model.Person;
 
+import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class to access Person data from the Person table in the SQLite Database
@@ -178,6 +181,17 @@ public class PersonDao {
     public void deletePerson(String personID) throws DatabaseException {
         PreparedStatement stmt = null;
         try {
+            stmt = connection.prepareStatement("SELECT * FROM PERSON WHERE personID = ?");
+            stmt.setString(1, personID);
+            ResultSet rs = stmt.executeQuery();
+            Person isExisting = null;
+            while(rs.next()) {
+                isExisting = new Person(rs.getString(1), rs.getString(2));
+            }
+
+            if(isExisting == null) return;
+
+
             stmt = connection.prepareStatement(DELETE_SQL);
             stmt.setString(1, personID);
             if (stmt.executeUpdate() != 1) {
@@ -289,13 +303,13 @@ public class PersonDao {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         int numberOfPersons = getCountOfAllPersons(associatedUsername);
-        Person[] data = new Person[numberOfPersons];
+        List<Person> list = new ArrayList<Person>();
+
         try {
             stmt = connection.prepareStatement("SELECT * FROM PERSON WHERE " +
                     "associatedUsername = ?");
             stmt.setString(1, associatedUsername);
             rs = stmt.executeQuery();
-            int arrayCounter = 0;
 
             while(rs.next()) {
                 Person tempPerson = new Person(rs.getString(1), rs.getString(2));
@@ -306,14 +320,15 @@ public class PersonDao {
                 tempPerson.setMotherId(rs.getString(7));
                 tempPerson.setSpouseId(rs.getString(8));
 
-                data[arrayCounter] = tempPerson;
-                arrayCounter++;
+                list.add(tempPerson);
             }
             if(rs != null) rs.close();
             if(stmt != null) stmt.close();
         } catch(Exception e) {
             return null;
         }
+        Person[] data = new Person[list.size()];
+        list.toArray(data);
         return data;
     }
 

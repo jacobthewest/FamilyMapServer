@@ -9,6 +9,9 @@ import model.Event;
 import result.ApiResult;
 import result.EventResult;
 
+import java.sql.Connection;
+import java.util.List;
+
 /**
  * Implements methods needed to serve the API route <code>/event/[eventID]</code>
  * and <code>/event</code>
@@ -60,11 +63,28 @@ public class EventService {
             }
 
             // userName in AuthToken MUST match associatedUsername in Event
-            if(!returnedEvent.getAssociatedUsername().equals(returnedAuthToken.getUserName())) {
+            // Make sure that the authToken belongs to the provided userName
+            boolean authTokensMatch = false;
+            authTokensMatch = authTokenAgreesWithSelf(returnedAuthToken);
+
+            if(!authTokensMatch) {
                 db.closeConnection();
                 return new EventResult(ApiResult.REQUESTED_EVENT_NO_RELATION, "AuthToken userName: " +
                         returnedAuthToken.getUserName() + " Event associatedUsername: " + returnedEvent.getAssociatedUsername());
             }
+
+            // Get the userName associated with the authToken.
+            String userNameFromAuthToken = returnedAuthToken.getUserName();
+            // Get the userName associated with the event.
+            String userNameFromEvent = returnedEvent.getAssociatedUsername();
+            // Are they the same?
+
+            if(!userNameFromAuthToken.equals(userNameFromEvent)) {
+                db.closeConnection();
+                return new EventResult(ApiResult.REQUESTED_EVENT_NO_RELATION, "AuthToken userName: " +
+                        returnedAuthToken.getUserName() + " Event associatedUsername: " + returnedEvent.getAssociatedUsername());
+            }
+
 
             // Close db connection and return
             db.closeConnection();
@@ -114,21 +134,14 @@ public class EventService {
             }
 
             // Make sure that the authToken belongs to the provided userName
+            boolean authTokensMatch = false;
+            authTokensMatch = authTokenAgreesWithSelf(returnedAuthToken);
             AuthToken authTokenForCheck = authTokenDao.getAuthTokenByUserName(returnedAuthToken.getUserName());
 
-            if(authTokenForCheck == null) {
+            if(!authTokensMatch) {
                 db.closeConnection();
                 return new EventResult(ApiResult.INVALID_AUTH_TOKEN,
                         "authToken of provided authToken does not exist in database.");
-            }
-
-            String tokenFromResponse = authTokenForCheck.getToken();
-            String tokenFromParameter = returnedAuthToken.getToken();
-
-            if(!tokenFromParameter.equals(tokenFromResponse)) {
-                db.closeConnection();
-                return new EventResult(ApiResult.INVALID_AUTH_TOKEN,
-                        "authToken of provided authToken does not match authToken with provided userName");
             }
 
             // Create eventDao thing where you get all Events
@@ -141,5 +154,41 @@ public class EventService {
             return new EventResult(ApiResult.INTERNAL_SERVER_ERROR,
                     e.getMessage() + " Failure to retrieve Event by EventID.");
         }
+    }
+
+    private boolean authTokenAgreesWithSelf(AuthToken authToken) {
+        try {
+            // Set up database
+            Database db = new Database();
+            db.loadDriver();
+            db.openConnection();
+            db.initializeTables();
+            db.commitConnection(true);
+            Connection connection = db.getConnection();
+
+            // Set up AuthTokenDao
+            AuthTokenDao authTokenDao = new AuthTokenDao();
+            authTokenDao.setConnection(connection);
+
+            // Try to retrieve from database
+            List<AuthToken> authTokensFromUsername = authTokenDao.getAllAuthTokensByUsername(authToken.getUserName());
+            db.closeConnection();
+
+            if(authTokensFromUsername == null) return false;
+            if(authTokensFromUsername.size() == 0) return false;
+
+            boolean tokensMatch = false;
+            boolean userNamesMatch = false;
+
+            for(int i = 0; i < authTokensFromUsername.size(); i++) {
+                if(authToken.getUserName().equals(authTokensFromUsername.get(i).getUserName())) userNamesMatch = true;
+                if(authToken.getToken().equals(authTokensFromUsername.get(i).getToken())) tokensMatch = true;
+                if(tokensMatch && userNamesMatch) return true;
+            }
+            return false;
+        } catch(DatabaseException e) {
+            System.out.println("Error with authTokenAgreesWithSelf() in PersonService class");
+        }
+        return false;
     }
 }

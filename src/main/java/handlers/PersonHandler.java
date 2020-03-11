@@ -39,7 +39,7 @@ public class PersonHandler implements HttpHandler {
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
             personResult.setSuccess(false);
             personResult.setMessage("Http 400, Bad Request");
-            personResult.setDescription("Invalid HTTP method. Method should be " + HTTP_METHOD);
+            //personResult.setDescription("Invalid HTTP method. Method should be " + HTTP_METHOD);
             errorFree = false;
         }
 
@@ -50,7 +50,7 @@ public class PersonHandler implements HttpHandler {
                 httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
                 personResult.setSuccess(false);
                 personResult.setMessage("Http 400, Bad Request");
-                personResult.setDescription("Invalid URL. URL should be '/event' or '/event/[eventID]'");
+                //personResult.setDescription("Invalid URL. URL should be '/event' or '/event/[eventID]'");
                 errorFree = false;
             }
         } else {
@@ -58,7 +58,7 @@ public class PersonHandler implements HttpHandler {
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
             personResult.setSuccess(false);
             personResult.setMessage("Http 400, Bad Request");
-            personResult.setDescription("No Authorization in request header.");
+            //personResult.setDescription("No Authorization in request header.");
             errorFree = false;
         }
 
@@ -106,7 +106,7 @@ public class PersonHandler implements HttpHandler {
             httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, RESPONSE_LENGTH);
             personResult.setSuccess(false);
             personResult.setMessage("Internal Server Error");
-            personResult.setDescription("Error: " + e.getMessage());
+            //personResult.setDescription("Error: " + e.getMessage());
             ObjectEncoder objectEncoder = new ObjectEncoder();
             String json = objectEncoder.serialize(personResult);
             OutputStream outputStream = httpExchange.getResponseBody();

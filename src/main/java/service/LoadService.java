@@ -36,6 +36,7 @@ public class LoadService {
             db.loadDriver();
             db.openConnection();
             db.initializeTables();
+            db.emptyTables();
             db.commitConnection(true);
 
             // Retrieve data from request

@@ -3,6 +3,7 @@ package service;
 import dataAccess.*;
 import model.Event;
 import model.Person;
+import model.User;
 import result.ApiResult;
 import result.FillResult;
 
@@ -31,7 +32,6 @@ public class FillService {
     private PersonDao personDao = null;
     private UserDao userDao = null;
     private EventDao eventDao = null;
-    private Database db = null;
 
     /**
      * Populates the server's database with generated data for the specified user name.
@@ -46,23 +46,31 @@ public class FillService {
      */
     public FillResult fill(String userName, int generations) {
         setUpDataForFill();
-
-        FillResult paramCheck = errorCheckParameters(userName, generations);
-        if(paramCheck != null) return paramCheck;
-
         try {
-            setUpDatabase();
-            createDaosAndSetConnections();
+            Database db = new Database();
+            setUpDatabase(db);
+            createDaosAndSetConnections(db);
+
+            FillResult paramCheck = errorCheckParameters(userName, generations, db);
+            if(paramCheck != null) return paramCheck;
 
             // The required "username" parameter must be a user already registered with the server
             Person preDeletePersonCopy = personDao.getPersonByAssociatedUsername(userName);
-            if(preDeletePersonCopy == null) {
+            User u = userDao.getUserByUserName(userName);
+
+            if(preDeletePersonCopy == null && u ==  null) {
                 db.closeConnection();
                 return new FillResult(ApiResult.INVALID_FILL_PARAM, "userName does not exist within the server");
             }
 
+            // In case the user exists in the database as a user and not yet as a person
+            if(preDeletePersonCopy == null) {
+                preDeletePersonCopy = new Person(u.getPersonID(), u.getUserName(), u.getFirstName(), u.getLastName(), u.getGender(),
+                        null, null, null);
+            }
+
             // If there is any data in the database already associated with the given user name, it is deleted.
-            deletePreExistingUserData(userName, preDeletePersonCopy);
+            deletePreExistingUserData(userName, preDeletePersonCopy, db);
 
             // Create the root person
             Person rootPerson = createRootPerson(preDeletePersonCopy);
@@ -82,7 +90,7 @@ public class FillService {
             insertEventsAndPersonsIntoDatabase();
 
             // Close db connection, commit, and return a successful FillResult
-            return finishFill();
+            return finishFill(db);
         } catch(DatabaseException e) {
             return new FillResult(ApiResult.INTERNAL_SERVER_ERROR, "Error filling with userName: '" +
                     userName + "' and '" + generations + "' generations. Error: " + e.getMessage());
@@ -217,6 +225,23 @@ public class FillService {
      * @param lastName lastName of the person. Is NULL if male
      * @return A Person object representing a child's parent
      */
+    private Person createPersonObject(String personID, String gender, String firstName, String lastName, boolean isRootPerson) {
+        // Randomly make their username, first name, and mom's last name
+        String firstNameCopy = firstName;
+        String lastNameCopy = lastName;
+
+        Person person = new Person(personID, UUID.randomUUID().toString(), firstNameCopy, lastNameCopy,
+                gender, UUID.randomUUID().toString(), UUID.randomUUID().toString(), null);
+        return person;
+    }
+
+    /**
+     * Creates an object that represents a parent
+     * @param personID Identifier of the person to create
+     * @param gender Gender of the person
+     * @param lastName lastName of the person. Is NULL if male
+     * @return A Person object representing a child's parent
+     */
     private Person createPersonObject(String personID, String gender, String lastName, boolean isRootPerson) {
         // Randomly make their username, first name, and mom's last name
         String firstName;
@@ -251,6 +276,17 @@ public class FillService {
         // Get their personID's from child
         Person mom = createPersonObject(child.getMotherId(), "f", null, false);
         Person dad = createPersonObject(child.getFatherId(), "m", child.getLastName(), false);
+
+        // Set the parent's associatedUserName
+        mom.setAssociatedUsername(child.getAssociatedUsername());
+        dad.setAssociatedUsername(child.getAssociatedUsername());
+
+        if(generations == 1) {
+            mom.setMotherId(null);
+            mom.setFatherId(null);
+            dad.setMotherId(null);
+            dad.setFatherId(null);
+        }
 
         // dad and mom get spouse id from each other
         mom.setSpouseId(dad.getPersonID());
@@ -329,13 +365,12 @@ public class FillService {
 
         int parentAgeAtMarriage = marriageYear - birthYear;
 
+        // For the test cases the parents are always dead.
         // MAX_DEATH_AGE - currentParentAge. I do this so the parent dies at 120 or under.
         int deathYear = marriageYear + random.nextInt(MAX_DEATH_AGE - parentAgeAtMarriage);
-        if (deathYear < CURRENT_YEAR) {
-            // The parent is dead
-            Event death = createEvent("Death", deathYear, parent);
-            this.generatedEvents.add(death);
-        }
+        Event death = createEvent("death", deathYear, parent);
+        this.generatedEvents.add(death);
+
         return birthYear;
     }
 
@@ -385,7 +420,7 @@ public class FillService {
         return this.LAST_NAMES.get(randomIndex);
     }
 
-    private void createDaosAndSetConnections() {
+    private void createDaosAndSetConnections(Database db) {
         eventDao = new EventDao();
         personDao = new PersonDao();
         userDao = new UserDao();
@@ -409,9 +444,8 @@ public class FillService {
         }
     }
 
-    private void setUpDatabase() {
+    private void setUpDatabase(Database db) {
         try {
-            db = new Database();
             db.loadDriver();
             db.openConnection();
             db.initializeTables();
@@ -434,42 +468,53 @@ public class FillService {
 
     private Person createRootPerson(Person preDeletePersonCopy) {
 
-        String gender;
-
-        // Randomly get person's gender
-        int result = random.nextInt(2);
-        if(result == 0){
-            gender = "m";
-        } else{
-            gender = "f";
-        }
+//        String gender;
+//
+//        // Randomly get person's gender
+//        int result = random.nextInt(2);
+//        if(result == 0){
+//            gender = "m";
+//        } else{
+//            gender = "f";
+//        }
 
         return createPersonObject(preDeletePersonCopy.getPersonID(),
-                gender, preDeletePersonCopy.getLastName(), true);
+                preDeletePersonCopy.getGender(), preDeletePersonCopy.getFirstName(), preDeletePersonCopy.getLastName(), true);
     }
 
-    private FillResult errorCheckParameters(String userName, int generations) {
+    private FillResult errorCheckParameters(String userName, int generations, Database db) {
         if(userName == null) {
+            try {
+                db.closeConnection();
+            } catch (DatabaseException e) {
+                e.printStackTrace();
+            }
             return new FillResult(ApiResult.INVALID_FILL_PARAM, "userName is null");
         }
         if(generations < 0) {
+            try {
+                db.closeConnection();
+            } catch (DatabaseException e) {
+                e.printStackTrace();
+            }
             return new FillResult(ApiResult.INVALID_FILL_PARAM, "Must request non-negative number of " +
                     "generations. Generations requested: " + generations);
         }
         return null;
     }
 
-    private void deletePreExistingUserData(String userName, Person preDeletePersonCopy) {
+    private void deletePreExistingUserData(String userName, Person preDeletePersonCopy, Database db) {
         try {
             eventDao.deleteAllEventsForAssociatedUsername(userName);
             personDao.deletePerson(preDeletePersonCopy.getPersonID());
             db.commitConnection(true);
+
         } catch(DatabaseException ex) {
             System.out.println("Problem in deletePreExistingUserData() function in FillService class: " + ex.getMessage());
         }
     }
 
-    private FillResult finishFill() {
+    private FillResult finishFill(Database db) {
         try {
             db.commitConnection(true);
             db.closeConnection();

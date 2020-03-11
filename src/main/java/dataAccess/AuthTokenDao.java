@@ -4,6 +4,8 @@ import model.AuthToken;
 import model.User;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class to access AuthToken data from the AuthToken table in the SQLite Database
@@ -228,6 +230,32 @@ public class AuthTokenDao {
             throw new DatabaseException("SQLException when selecting AuthToken object: " + e);
         }
         return returnedAuthToken;
+    }
+
+    public List<AuthToken> getAllAuthTokensByUsername(String userName) throws DatabaseException{
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        AuthToken returnedAuthToken = null;
+        List<AuthToken> list = new ArrayList<AuthToken>();
+
+        try {
+            stmt = connection.prepareStatement(SELECT_BY_USER_NAME);
+            stmt.setString(1, userName);
+            rs = stmt.executeQuery();
+
+            String authToken = null;
+            while (rs.next()) {
+                authToken = rs.getString(1);
+                returnedAuthToken = new AuthToken(authToken, userName);
+                list.add(returnedAuthToken);
+            }
+            if(rs != null) rs.close();
+            if(stmt != null) stmt.close();
+        }
+        catch (Exception e) {
+            throw new DatabaseException("SQLException when selecting AuthToken object: " + e);
+        }
+        return list;
     }
 
     /**

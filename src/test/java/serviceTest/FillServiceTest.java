@@ -88,7 +88,9 @@ public class FillServiceTest {
     public void twoParamFillPass() {
         // Valid userName: "userName"  // Valid because of the inserts we did earlier.
         // Generations we will use to test: 2, to keep it simple
-        FillResult fillResult = fillService.fill(VALID_USERNAME, GENERATIONS_FOR_TEST);
+        FillResult fillResult = null;
+
+        fillResult = fillService.fill(VALID_USERNAME, GENERATIONS_FOR_TEST);
 
         double numPeopleSupposedToBeAdded = Math.pow(2, (GENERATIONS_FOR_TEST + 1)) - 1; // Algorithm for calculating number of nodes in ancestry tree
         int numPeopleAdded = 0;
@@ -107,7 +109,8 @@ public class FillServiceTest {
      */
     @Test
     public void twoParamFillFail() {
-        FillResult fillResult = fillService.fill(VALID_USERNAME, -3);
+        FillResult fillResult = null;
+        fillResult = fillService.fill(VALID_USERNAME, -3);
 
         assertEquals(ApiResult.INVALID_FILL_PARAM, fillResult.getMessage());
         assertFalse(fillResult.getSuccess());
